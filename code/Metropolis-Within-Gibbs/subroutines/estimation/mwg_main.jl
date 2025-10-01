@@ -105,7 +105,7 @@ function mwg_main(par::ParSsm, h::Int64, nDraws::Array{Int64, 1}, burnin::Array{
      prior_opt = PriorOpt(Normal(0, 1/xi),
                           Truncated(Normal(0, 1/xi), MIN_coeff_plus, MAX_coeff_plus),
                           Truncated(Normal(0, 1/xi), MIN_coeff_minus, MAX_coeff_minus),
-                          InverseGamma(1e-8, 1e-8),
+                          InverseGamma(3, 1),
                           par_size.λ*logpdf.(Uniform(MIN_λ, MAX_λ), MIN_λ),
                           par_size.ρ*logpdf.(Uniform(MIN_ρ, MAX_ρ), MIN_ρ),
                           par_size.Q_cov*logpdf.(Uniform(MIN_corr, MAX_corr), MIN_corr));

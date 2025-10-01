@@ -212,15 +212,6 @@ F_{t}^{spf}\pi_{t+4}
 0\\
 \mu_{t}^{uom}\\
 \mu_{t}^{spf}
-\end{array}\right)}+\underset{noise.R}{\left(\begin{array}{c}
-0\\
-0\\
-0\\
-0\\
-0\\
-0\\
-0\\
-0
 \end{array}\right)}
 \end{align*}
 
@@ -246,38 +237,7 @@ The complete state ordering in the code is
 \end_layout
 
 \begin_layout Subsection
-The simpel NK model:
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula 
-\begin{align*}
-\underset{obs}{\left(\begin{array}{c}
-y_{t}\\
-e_{t}\\
-\pi_{t}\\
-E_{t}\pi_{t+1}
-\end{array}\right)} & =\underset{obs.mat.Z}{\left(\begin{array}{cccc}
-1 & 1 & 0 & 0\\
-0 & \alpha & 0 & 0\\
-0 & \delta_{e}+\kappa & \delta_{\pi}+1 & 1\\
-0 & \delta_{e} & \delta_{\pi} & 1
-\end{array}\right)}\times\underset{states}{\left(\begin{array}{c}
-\mu_{t}^{y}\\
-\Psi_{t}^{e}\\
-\Psi_{t}^{\pi}\\
-\mu_{t}^{\pi}
-\end{array}\right)}+\underset{noise.R}{\left(\begin{array}{c}
-\varepsilon_{t}^{y}\\
-\varepsilon_{t}^{n}\\
-\varepsilon_{t}^{\pi}\\
-\varepsilon_{t}^{E}
-\end{array}\right)}
-\end{align*}
-
-\end_inset
-
-
+The simpel NK model in simulation excersize:
 \end_layout
 
 \begin_layout Standard
@@ -301,15 +261,15 @@ The most simple three obs version is
 \begin{align*}
 \underset{obs}{\left(\begin{array}{c}
 y_{t}\\
-e_{t}\\
+n_{t}\\
 \pi_{t}-\beta E_{t}\pi_{t+1}
 \end{array}\right)} & =\underset{obs.mat.Z}{\left(\begin{array}{ccc}
 1 & 1 & 0\\
 0 & \alpha & 0\\
 0 & \kappa & 1
 \end{array}\right)}\times\underset{states}{\left(\begin{array}{c}
-\mu_{t}^{y}\\
-\Psi_{t}\\
+\mu_{t}^{e}\\
+\Psi_{t}^{e}\\
 \Psi_{t}^{\pi}
 \end{array}\right)}+\underset{noise}{\left(\begin{array}{c}
 \varepsilon_{t}^{y}\\
@@ -323,8 +283,74 @@ e_{t}\\
 
 \end_layout
 
+\begin_layout Standard
+The flex gap 
+\begin_inset Formula $\Psi^{f}$
+\end_inset
+
+ is then backed out as 
+\begin_inset Formula $\Psi_{t}^{e}+\frac{1}{\kappa}\Psi_{t}^{\pi}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The flex gap estimating version is
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\underset{obs}{\left(\begin{array}{c}
+y_{t}\\
+\pi_{t}-\beta E_{t}\pi_{t+1}
+\end{array}\right)} & =\underset{obs.mat.Z}{\left(\begin{array}{cc}
+1 & 1\\
+0 & \kappa
+\end{array}\right)}\times\underset{states}{\left(\begin{array}{c}
+\mu_{t}^{f}\\
+\Psi_{t}^{f}
+\end{array}\right)}+\underset{noise}{\left(\begin{array}{c}
+\varepsilon_{t}^{y}\\
+\varepsilon_{t}^{\pi}
+\end{array}\right)}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The efficient gap version is
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\underset{obs}{\left(\begin{array}{c}
+y_{t}\\
+n_{t}
+\end{array}\right)} & =\underset{obs.mat.Z}{\left(\begin{array}{cc}
+1 & 1\\
+0 & \alpha
+\end{array}\right)}\times\underset{states}{\left(\begin{array}{c}
+\mu_{t}^{e}\\
+\Psi_{t}^{e}
+\end{array}\right)}+\underset{noise}{\left(\begin{array}{c}
+\varepsilon_{t}^{y}\\
+\varepsilon_{t}^{n}
+\end{array}\right)}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
 \begin_layout Subsection
-Reduced Hasenzagel
+Empirical Flex+Eff model
 \end_layout
 
 \begin_layout Standard
@@ -386,58 +412,12 @@ with
 \begin_inset Formula 
 \begin{align*}
 \underset{obs}{\left(\begin{array}{c}
-y_{t}\\
-e_{t}\\
-u_{t}\\
-\pi_{t}-E_{t}^{uom}\pi_{t+4}\\
-\pi_{t}-E_{t}^{spf}\pi_{t+4}
-\end{array}\right)} & =\underset{obs.\,mat.}{\left(\begin{array}{cccc}
-1 & 0 & 0 & 0\\
-\psi_{e,1} & \psi_{e,2} & 0 & 0\\
-\psi_{u,1} & \psi_{u,2} & 0 & 0\\
-\kappa & \delta & 1 & \gamma\\
-\kappa & \delta & 1 & \gamma
-\end{array}\right)}\times\underset{common\,states}{\left(\begin{array}{c}
-x_{t}^{e}\\
-x_{t}^{e*}\\
-u_{t}^{\pi}\\
-u_{t}^{\pi*}
-\end{array}\right)}+\underset{idio.\,cycles}{\left(\begin{array}{c}
-\Psi_{t}^{y}\\
-\Psi_{t}^{e}\\
-\Psi_{t}^{u}\\
-\Psi_{t}^{uom}\\
-\Psi_{t}^{spf}
-\end{array}\right)}+\underset{idio.\,trends}{\left(\begin{array}{c}
-\mu_{t}^{y}\\
-\mu_{t}^{e}\\
-\mu_{t}^{u}\\
-\mu_{t}^{uom}\\
-\mu_{t}^{spf}
-\end{array}\right)}+\underset{noise}{\left(\begin{array}{c}
-0\\
-0\\
-0\\
-0\\
-0
-\end{array}\right)}
-\end{align*}
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula 
-\begin{align*}
-\underset{obs}{\left(\begin{array}{c}
-y_{t}\\
-e_{t}\\
-u_{t}\\
-\pi_{t}-F_{t}^{uom}\pi_{t+4}\\
-\pi_{t}-F_{t}^{spf}\pi_{t+4}
-\end{array}\right)} & =\underset{obs.mat.Z}{\left(\begin{array}{cccc}
+y_{t}/\sigma^{y}\\
+e_{t}/\sigma^{e}\\
+u_{t}/\sigma^{u}\\
+(\pi_{t}-F_{t}^{uom}\pi_{t+4})/\sigma^{UoM}\\
+(\pi_{t}-F_{t}^{spf}\pi_{t+4})/\sigma^{SPF}
+\end{array}\right)} & =Diag(1/\sigma)\times\underset{obs.mat.Z}{\left(\begin{array}{cccc}
 1 & 0 & 0 & 0\\
 \delta_{e,1} & \delta_{e,2} & 0 & 0\\
 \delta_{u,1} & \delta_{u,2} & 0 & 0\\
@@ -449,23 +429,17 @@ u_{t}\\
 \Psi_{t}^{\pi}\\
 \Psi_{t}^{\pi*}
 \end{array}\right)}+\underset{idio.cycles}{\left(\begin{array}{c}
-\Psi_{t}^{y}\\
-\Psi_{t}^{e}\\
-\Psi_{t}^{u}\\
-\Psi_{t}^{uom}\\
-\Psi_{t}^{spf}
+\Psi_{t}^{y}/\sigma^{y}\\
+\Psi_{t}^{e}/\sigma^{e}\\
+\Psi_{t}^{u}/\sigma^{u}\\
+\Psi_{t}^{uom}/\sigma^{UoM}\\
+\Psi_{t}^{spf}/\sigma^{SPF}
 \end{array}\right)}+\underset{idio.trends}{\left(\begin{array}{c}
-\mu_{t}^{y}\\
-\mu_{t}^{e}\\
-\mu_{t}^{u}\\
-\mu_{t}^{uom}\\
-\mu_{t}^{spf}
-\end{array}\right)}+\underset{noise.R}{\left(\begin{array}{c}
-0\\
-0\\
-0\\
-0\\
-0
+\mu_{t}^{y}/\sigma^{y}\\
+\mu_{t}^{e}/\sigma^{e}\\
+\mu_{t}^{u}/\sigma^{u}\\
+\mu_{t}^{uom}/\sigma^{uom}\\
+\mu_{t}^{spf}/\sigma^{spf}
 \end{array}\right)}
 \end{align*}
 
@@ -491,46 +465,72 @@ The complete state ordering in the code is
 \end_layout
 
 \begin_layout Standard
-In the textbook NK-model there is a direct mapping from marginal costs to the output gap which makes it possible to substitute in the gap for marginal costs in the Phillips curve but the general NK-Phillips curve does depend on marginal cost and not the gap.
- Now we consider the case where some parts of marginal cost map to the output gap and some parts are unrelated marginal cost shifters.
- We assume most of these cost shifters are covered by energy price cycles like those considered in Hasenzagel et al.
- The Phillips curve we consider is then
-\family roman
-\series medium
-\shape up
-\size normal
-\emph off
-\nospellcheck off
-\bar no
-\strikeout off
-\xout off
-\uuline off
-\uwave off
-\noun off
-\color none
- 
-\begin_inset Formula $\pi_{t}=\beta E(\pi_{t+1})+\delta\pi_{t-1}+\nu MC_{t},$
+I get 
+\begin_inset Formula $\Psi^{\pi}$
 \end_inset
 
-
-\begin_inset Formula $\nu MC_{t}\equiv\kappa\Psi_{t}^{e}+u_{t}+\phi\Psi_{t}^{EP}$
-\end_inset
-
-.
- Hense there is an independent cost push cycle 
-\begin_inset Formula $\Psi^{EP},$
-\end_inset
-
-and efficient output gap 
+and 
 \begin_inset Formula $\Psi^{e}$
 \end_inset
 
- and a flex price gap 
-\begin_inset Formula $\Psi^{f}\equiv\Psi_{t}^{e}+\frac{1}{\kappa}\Psi_{t}^{\pi}$
+ and back out 
+\begin_inset Formula $\Psi^{f}$
+\end_inset
+
+ as 
+\begin_inset Formula $\Psi^{f}=(\Psi^{e}+\frac{1}{\kappa}\Psi^{\pi})\cdot\sigma^{y}$
 \end_inset
 
 .
- Hence the model is
+ 
+\end_layout
+
+\begin_layout Subsubsection
+No lag version
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\underset{obs}{\left(\begin{array}{c}
+y_{t}/\sigma^{y}\\
+e_{t}/\sigma^{e}\\
+u_{t}/\sigma^{u}\\
+(\pi_{t}-F_{t}^{uom}\pi_{t+4})/\sigma^{UoM}\\
+(\pi_{t}-F_{t}^{spf}\pi_{t+4})/\sigma^{SPF}
+\end{array}\right)} & =Diag(1/\sigma)\times\underset{obs.mat.Z}{\left(\begin{array}{cccc}
+1 & 0 & 0 & 0\\
+\delta_{e,1} & 0 & 0 & 0\\
+\delta_{u,1} & 0 & 0 & 0\\
+\kappa & 0 & 1 & 0\\
+\kappa & 0 & 1 & 0
+\end{array}\right)}\times\underset{common\,states}{\left(\begin{array}{c}
+\Psi_{t}^{e}\\
+\Psi_{t}^{e*}\\
+\Psi_{t}^{\pi}\\
+\Psi_{t}^{\pi*}
+\end{array}\right)}+\underset{idio.cycles}{\left(\begin{array}{c}
+\Psi_{t}^{y}/\sigma^{y}\\
+\Psi_{t}^{e}/\sigma^{e}\\
+\Psi_{t}^{u}/\sigma^{u}\\
+\Psi_{t}^{uom}/\sigma^{UoM}\\
+\Psi_{t}^{spf}/\sigma^{SPF}
+\end{array}\right)}+\underset{idio.trends}{\left(\begin{array}{c}
+\mu_{t}^{y}/\sigma^{y}\\
+\mu_{t}^{e}/\sigma^{e}\\
+\mu_{t}^{u}/\sigma^{u}\\
+\mu_{t}^{uom}/\sigma^{uom}\\
+\mu_{t}^{spf}/\sigma^{spf}
+\end{array}\right)}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+An inflation forecasting flex+eff model
 \end_layout
 
 \begin_layout Standard
@@ -540,256 +540,105 @@ and efficient output gap
 y_{t}\\
 e_{t}\\
 u_{t}\\
-\pi_{t}-F_{t}^{uom}\pi_{t+4}\\
-\pi_{t}-F_{t}^{spf}\pi_{t+4}\\
-oil_{t}
-\end{array}\right)} & =\underset{obs.mat.Z}{\left(\begin{array}{cccccc}
-1 & 0 & 0 & 0 & 0 & 0\\
-\delta_{e,1} & \delta_{e,2} & 0 & 0 & 0 & 0\\
-\delta_{u,1} & \delta_{u,2} & 0 & 0 & 0 & 0\\
-\kappa & \delta & 1 & \gamma & \nu_{1} & \nu_{2}\\
-\kappa & \delta & 1 & \gamma & \nu_{1} & \nu_{2}\\
-\delta_{oil,1} & \delta_{oil,2} & \gamma_{oil,1} & \gamma_{oil,2} & 1 & 0
+\pi_{t}\\
+F_{t}^{uom}\pi_{t+4}\\
+F_{t}^{spf}\pi_{t+4}
+\end{array}\right)} & =Diag(1/\sigma)\times\underset{obs.mat.Z}{\left(\begin{array}{ccccc}
+1 & 0 & 0 & 0 & 0\\
+\delta_{e,1} & \delta_{e,2} & 0 & 0 & 0\\
+\delta_{u,1} & \delta_{u,2} & 0 & 0 & 0\\
+\left(\delta_{E,1}+\kappa\right) & \left(\delta_{E,2}+\delta\right) & \left(\gamma_{E,1}+1\right) & \left(\gamma_{E,2}+\gamma\right)/\sigma^{\pi} & 1\\
+\delta_{E,1} & \delta_{E,2} & \gamma_{E,1} & \gamma_{E,2} & 1\\
+\delta_{E,1} & \delta_{E,2} & \gamma_{E,1} & \gamma_{E,2} & 1
 \end{array}\right)}\times\underset{common\,states}{\left(\begin{array}{c}
 \Psi_{t}^{e}\\
 \Psi_{t}^{e*}\\
 \Psi_{t}^{\pi}\\
 \Psi_{t}^{\pi*}\\
-\Psi_{t}^{EP}\\
-\Psi_{t}^{EP*}
+\mu_{t}^{\pi}
 \end{array}\right)}+\underset{idio.cycles}{\left(\begin{array}{c}
 \Psi_{t}^{y}\\
 \Psi_{t}^{e}\\
 \Psi_{t}^{u}\\
-\Psi_{t}^{uom}\\
-\Psi_{t}^{spf}\\
-\Psi_{t}^{oil}
+\Psi_{t}^{\pi}\\
+\Psi_{t}^{UoM}\\
+\Psi_{t}^{spf}
 \end{array}\right)}+\underset{idio.trends}{\left(\begin{array}{c}
 \mu_{t}^{y}\\
 \mu_{t}^{e}\\
 \mu_{t}^{u}\\
-\mu_{t}^{uom}\\
-\mu_{t}^{spf}\\
-\mu_{t}^{oil}
-\end{array}\right)}+\underset{noise.R}{\left(\begin{array}{c}
-0\\
-0\\
-0\\
-0\\
-0\\
-0
-\end{array}\right)}
-\end{align*}
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Section
-Building it up
-\end_layout
-
-\begin_layout Standard
-We start with three observations:
- 
-\begin_inset Formula $y_{t},$
-\end_inset
-
-
-\begin_inset Formula $n_{t}$
-\end_inset
-
- and 
-\begin_inset Formula $\pi_{t}-\beta E_{t}\pi_{t+1}$
-\end_inset
-
-.
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula 
-\begin{align*}
-\underset{obs}{\left(\begin{array}{c}
-y_{t}\\
-n_{t}\\
-\pi_{t}-\beta E_{t}\pi_{t+1}
-\end{array}\right)} & =\underset{obs.mat.Z}{\left(\begin{array}{ccc}
-1 & 1 & 0\\
-0 & \alpha & 0\\
-0 & \kappa & 1
-\end{array}\right)}\times\underset{states}{\left(\begin{array}{c}
-\mu_{t}^{y}\\
-\Psi_{t}\\
-\Psi_{t}^{\pi}
-\end{array}\right)}+\underset{noise}{\left(\begin{array}{c}
-\varepsilon_{t}^{y}\\
-\varepsilon_{t}^{n}\\
-\varepsilon_{t}^{\pi}
-\end{array}\right)}
-\end{align*}
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-Now we extend to haven 
-\begin_inset Formula $\pi_{t}$
-\end_inset
-
- and 
-\begin_inset Formula $E_{t}\pi_{t+1}$
-\end_inset
-
- as seperate observations loading on the same states
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula 
-\begin{align*}
-\underset{obs}{\left(\begin{array}{c}
-y_{t}\\
-n_{t}\\
-\pi_{t}\\
-E_{t}\pi_{t+1}
-\end{array}\right)} & =\underset{obs.mat.Z}{\left(\begin{array}{ccc}
-1 & 1 & 0\\
-0 & 1/(1-\alpha) & 0\\
-0 & \delta_{1}+\kappa & \delta_{2}+1\\
-0 & \delta_{1} & \delta_{2}
-\end{array}\right)}\times\underset{states}{\left(\begin{array}{c}
-\mu_{t}^{y}\\
-\Psi_{t}\\
-\Psi_{t}^{\pi}
-\end{array}\right)}+\underset{noise}{\left(\begin{array}{c}
-\varepsilon_{t}^{y}\\
-\varepsilon_{t}^{n}\\
-\varepsilon_{t}^{\pi}\\
-\varepsilon_{t}^{E\pi}
-\end{array}\right)}
-\end{align*}
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-We now extend to include idiosynctraic trends and cycles
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula 
-\begin{align*}
-\left(\begin{array}{c}
-y_{t}\\
-n_{t}\\
-\pi_{t}\\
-E_{t}\pi_{t+1}
-\end{array}\right) & =\underset{obs.mat.Z}{\left(\begin{array}{cccc}
-1 & 1 & 0 & 0\\
-0 & \delta_{e} & 0 & 0\\
-0 & \delta_{1}+\kappa & \delta_{2}+1 & 1\\
-0 & \delta_{1} & \delta_{2} & 1
-\end{array}\right)}\times\underset{key-states}{\left(\begin{array}{c}
-\mu_{t}^{y}\\
-\Psi_{t}\\
-\Psi_{t}^{\pi}\\
-\mu_{t}^{\pi}
-\end{array}\right)}+\underset{trends}{\left(\begin{array}{c}
-0\\
-\mu_{t}^{n}\\
-0\\
-\mu_{t}^{E\pi}
-\end{array}\right)}+\underset{idio.cycles/noise}{\left(\begin{array}{c}
-\varepsilon_{t}^{y}\\
-\Psi_{t}^{n}\\
-\varepsilon_{t}^{\pi}\\
-\varepsilon_{t}^{E\pi}
-\end{array}\right)}
-\end{align*}
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-Now we extend to real data.
- We observe 
-\begin_inset Formula $y_{t},$
-\end_inset
-
-
-\begin_inset Formula $e_{t}$
-\end_inset
-
-,
- 
-\begin_inset Formula $u_{t},$
-\end_inset
-
- 
-\begin_inset Formula $\pi_{t},$
-\end_inset
-
- 
-\begin_inset Formula $\pi_{t}^{c}$
-\end_inset
-
-,
- 
-\begin_inset Formula $F_{t}^{uom}\pi_{t+4},$
-\end_inset
-
- and 
-\begin_inset Formula $F_{t}^{spf}\pi_{t+4}$
-\end_inset
-
-.
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula 
-\begin{align*}
-\left(\begin{array}{c}
-y_{t}\\
-e_{t}\\
-u_{t}\\
-\pi_{t}\\
-\pi_{t}^{c}\\
-F_{t}^{uom}\pi_{t+4}\\
-F_{t}^{spf}\pi_{t+4}
-\end{array}\right) & =\underset{obs.mat.Z}{\left(\begin{array}{ccc}
-1 & 0 & 0\\
-\delta_{e} & 0 & 0\\
-\delta_{u} & 0 & 0\\
-\delta_{1}+\kappa & \delta_{2}+1 & 1/\sigma_{obs}\\
-\delta_{1}+\kappa & \delta_{2}+1 & 1/\sigma_{obs}\\
-\delta_{1} & \delta_{2} & 1/\sigma_{obs}\\
-\delta_{1} & \delta_{2} & 1/\sigma_{obs}
-\end{array}\right)}\times\underset{states}{\left(\begin{array}{c}
-\Psi\\
-\Psi^{\pi}\\
-\mu_{t}^{\pi}
-\end{array}\right)}+\underset{trends}{\left(\begin{array}{c}
-\mu_{t}^{y}\\
-\mu_{t}^{e}\\
-\mu_{t}^{u}\\
-0\\
 0\\
 \mu_{t}^{uom}\\
 \mu_{t}^{spf}
-\end{array}\right)}+\underset{idio.cycles/noise}{\left(\begin{array}{c}
-\varepsilon_{t}^{y}\\
+\end{array}\right)}
+\end{align*}
+
+\end_inset
+
+There is a scaling issue in the above right?
+ Should i divide with the scale in the other common paramets for infaltion obs?
+\end_layout
+
+\begin_layout Subsection
+Empirical Eff model
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\underset{obs}{\left(\begin{array}{c}
+y_{t}\\
+e_{t}\\
+u_{t}
+\end{array}\right)} & =\underset{obs.mat.Z}{\left(\begin{array}{cc}
+1 & 0\\
+\delta_{e,1} & \delta_{e,2}\\
+\delta_{u,1} & \delta_{u,2}
+\end{array}\right)}\times\underset{common\,states}{\left(\begin{array}{c}
 \Psi_{t}^{e}\\
-\Psi_{t}^{u}\\
-\varepsilon_{t}^{\pi}\\
-\varepsilon_{t}^{\pi^{c}}\\
-\varepsilon_{t}^{uom}\\
-\varepsilon_{t}^{spf}
+\Psi_{t}^{e*}
+\end{array}\right)}+\underset{idio.cycles}{\left(\begin{array}{c}
+\Psi_{t}^{y}\\
+\Psi_{t}^{e}\\
+\Psi_{t}^{u}
+\end{array}\right)}+\underset{idio.trends}{\left(\begin{array}{c}
+\mu_{t}^{y}\\
+\mu_{t}^{e}\\
+\mu_{t}^{u}
+\end{array}\right)}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Empirical Flex model
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\underset{obs}{\left(\begin{array}{c}
+y_{t}\\
+\pi_{t}-F_{t}^{uom}\pi_{t+4}\\
+\pi_{t}-F_{t}^{spf}\pi_{t+4}
+\end{array}\right)} & =\underset{obs.mat.Z}{\left(\begin{array}{cc}
+1 & 0\\
+\kappa & \delta\\
+\kappa & \delta
+\end{array}\right)}\times\underset{common\,states}{\left(\begin{array}{c}
+\Psi_{t}^{\pi}\\
+\Psi_{t}^{\pi*}
+\end{array}\right)}+\underset{idio.cycles}{\left(\begin{array}{c}
+\Psi_{t}^{y}\\
+\Psi_{t}^{uom}\\
+\Psi_{t}^{spf}
+\end{array}\right)}+\underset{idio.trends}{\left(\begin{array}{c}
+\mu_{t}^{y}\\
+\mu_{t}^{uom}\\
+\mu_{t}^{spf}
 \end{array}\right)}
 \end{align*}
 

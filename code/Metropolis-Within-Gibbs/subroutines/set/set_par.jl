@@ -38,17 +38,23 @@ function set_par!(θ_bound, θ_unb, par, opt_transf, MIN, MAX, par_ind, par_size
 
           if par_size.Z > 0
                 par.Z[par_ind.Z .== true] = θ_bound[iend+1:iend+par_size.Z];
-               if size(par.Z)[1] == 5 # full model specific restriction
+               if size(par.Z)[1] == 5 # full model 
+                    # undo previous scale
+                    par.Z[1:5, 1:4] .= Diagonal(vec(σʸ)) * par.Z[1:5, 1:4];
+                    # fill parameters
                     par.Z[5,1:4] = copy(par.Z[4,1:4]); # common loading on obs 5 same as obs 4
                     # scale with 1/σʸ
-                    # scale = vec(σʸ)   
-                    # par.Z[1:5, 1:4] .= par.Z[1:5, 1:4] ./ scale # scale the common loadings with 1/σʸ to get common states in true scale
+                    par.Z[1:5, 1:4] .= Diagonal(1.0 ./ vec(σʸ)) * par.Z[1:5, 1:4]  # scale the common loadings with 1/σʸ to get common states in true scale
                elseif size(par.Z)[1] == 7 # full_inf model specific restriction
+                    # undo previous scale
+                    par.Z[1:7, 1:5] .= Diagonal(vec(σʸ)) * par.Z[1:7, 1:5];
+                    # fill parameters
                     par.Z[7,1:4] = par.Z[6,1:4]; # common loading on obs 6 same as obs 7
                     par.Z[4,1:4] = par.Z[4,1:4].+par.Z[6,1:4];
                     par.Z[5,1:2] = par.Z[4,1:2];  
                     par.Z[5,1:5] = par.Z[5,1:5].*0; # no loading on common states for core inflation (temp)
-            
+                    # scale with 1/σʸ
+                    par.Z[1:7, 1:5] .= Diagonal(1.0 ./ vec(σʸ)) * par.Z[1:7, 1:5]  # scale the common loadings with 1/σʸ to get common states in true scale
                elseif par_size.Z==2 # flex gap model specific restriction
                     par.Z[3,1:2] = par.Z[2,1:2]; # kappa on both eff and flex gap
                end

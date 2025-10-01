@@ -1,0 +1,655 @@
+#LyX 2.4 created this file. For more info see https://www.lyx.org/
+\lyxformat 620
+\begin_document
+\begin_header
+\save_transient_properties true
+\origin unavailable
+\textclass article
+\use_default_options true
+\maintain_unincluded_children no
+\language danish
+\language_package default
+\inputencoding utf8
+\fontencoding auto
+\font_roman "default" "default"
+\font_sans "default" "default"
+\font_typewriter "default" "default"
+\font_math "auto" "auto"
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_roman_osf false
+\font_sans_osf false
+\font_typewriter_osf false
+\font_sf_scale 100 100
+\font_tt_scale 100 100
+\use_microtype false
+\use_dash_ligatures true
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\float_placement class
+\float_alignment class
+\paperfontsize default
+\use_hyperref false
+\papersize default
+\use_geometry false
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 1
+\use_package esint 1
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 1
+\use_formatted_ref 0
+\use_minted 0
+\use_lineno 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\is_math_indent 0
+\math_numbering_side default
+\quotes_style english
+\dynamic_quotes 0
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tablestyle default
+\tracking_changes false
+\output_changes false
+\change_bars false
+\postpone_fragile_content true
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\docbook_table_output 0
+\docbook_mathml_prefix 1
+\end_header
+
+\begin_body
+
+\begin_layout Section
+Models
+\end_layout
+
+\begin_layout Subsection
+Hasenzagel model:
+\end_layout
+
+\begin_layout Standard
+
+\series bold
+Observation block:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\underset{obs}{\left(\begin{array}{c}
+y_{t}\\
+e_{t}\\
+u_{t}\\
+oil_{t}\\
+\pi_{t}\\
+\pi_{t}^{c}\\
+F_{t}^{uom}\pi_{t+4}\\
+F_{t}^{spf}\pi_{t+4}
+\end{array}\right)} & =\underset{obs.mat.Z}{\left(\begin{array}{ccc}
+1 & 0 & 0\\
+\delta_{e,1}+\delta_{e,2}L & 0 & 0\\
+\delta_{u,1}+\delta_{u,2}L & 0 & 0\\
+\delta_{oil,1}+\delta_{oil,2}L & 1 & 0\\
+\delta_{\pi,1}+\delta_{\pi,2}L & \gamma_{\pi,1}+\gamma_{\pi,2}L & 1/\sigma_{obs}\\
+\delta_{\pi^{c},1}+\delta_{\pi^{c},2}L & \gamma_{\pi^{c},1}+\gamma_{\pi^{c},2}L & 1/\sigma_{obs}\\
+\delta_{uom,1}+\delta_{uom,2}L+\delta_{uom,3}L^{2} & \gamma_{uom,1}+\gamma_{uom,2}L & 1/\sigma_{obs}\\
+\delta_{spf,1}+\delta_{spf,2}L+\delta_{spf,3}L^{2} & \gamma_{spf,1}+\gamma_{spf,2}L & 1/\sigma_{obs}
+\end{array}\right)}\times\underset{states}{\left(\begin{array}{c}
+\Psi_{t}\\
+\Psi_{t}^{EP}\\
+\mu_{t}^{\pi}
+\end{array}\right)}+\underset{idio.cycles(noise)}{\left(\begin{array}{c}
+\Psi_{t}^{y}\\
+\Psi_{t}^{e}\\
+\Psi_{t}^{u}\\
+\Psi_{t}^{oil}\\
+\Psi_{t}^{\pi}\\
+\Psi_{t}^{\pi^{c}}\\
+\Psi_{t}^{uom}\\
+\Psi_{t}^{spf}
+\end{array}\right)}+\underset{trends/noise}{\left(\begin{array}{c}
+\mu_{t}^{y}\\
+\mu_{t}^{e}\\
+\mu_{t}^{u}\\
+\mu_{t}^{oil}\\
+0\\
+0\\
+\mu_{t}^{uom}\\
+\mu_{t}^{spf}
+\end{array}\right)}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $\Psi$
+\end_inset
+
+ follow generalized ARMA(2,1) cycles and 
+\begin_inset Formula $\mu$
+\end_inset
+
+ are random walk trends potentially with drift
+\end_layout
+
+\begin_layout Standard
+In the code the formulation is
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\underset{obs}{\left(\begin{array}{c}
+y_{t}\\
+e_{t}\\
+u_{t}\\
+oil_{t}\\
+\pi_{t}\\
+\pi_{t}^{c}\\
+F_{t}^{uom}\pi_{t+4}\\
+F_{t}^{spf}\pi_{t+4}
+\end{array}\right)} & =\underset{obs.mat.Z}{\left(\begin{array}{cccccc}
+1 & 0 & 0 & 0 & 0 & 0\\
+\delta_{e,1} & \delta_{e,2} & 0 & 0 & 0 & 0\\
+\delta_{u,1} & \delta_{u,2} & 0 & 0 & 0 & 0\\
+\delta_{oil,1} & \delta_{oil,2} & 0 & 1 & 0 & 0\\
+\delta_{\pi,1} & \delta_{\pi,2} & 0 & \gamma_{\pi,1} & \gamma_{\pi,2} & 1/\sigma_{obs}\\
+\delta_{\pi^{c},1} & \delta_{\pi^{c},2} & 0 & \gamma_{\pi^{c},1} & \gamma_{\pi^{c},2} & 1/\sigma_{obs}\\
+\delta_{uom,1} & \delta_{uom,2} & \delta_{uom,3} & \gamma_{uom,1} & \gamma_{uom,2} & 1/\sigma_{obs}\\
+\delta_{spf,1} & \delta_{spf,2} & \delta_{spf,3} & \gamma_{spf,1} & \gamma_{spf,2} & 1/\sigma_{obs}
+\end{array}\right)}\times\underset{common\,states}{\left(\begin{array}{c}
+\Psi_{t}\\
+\Psi_{t}^{*}\\
+\Psi_{t-1}^{*}\\
+\Psi_{t}^{EP}\\
+\Psi_{t}^{EP*}\\
+\mu_{t}^{\pi}
+\end{array}\right)}+\underset{idio.cycles}{\left(\begin{array}{c}
+\Psi_{t}^{y}\\
+\Psi_{t}^{e}\\
+\Psi_{t}^{u}\\
+\Psi_{t}^{oil}\\
+\Psi_{t}^{\pi}\\
+\Psi_{t}^{\pi^{c}}\\
+\Psi_{t}^{uom}\\
+\Psi_{t}^{spf}
+\end{array}\right)}+\underset{idio.trends}{\left(\begin{array}{c}
+\mu_{t}^{y}\\
+\mu_{t}^{e}\\
+\mu_{t}^{u}\\
+\mu_{t}^{oil}\\
+0\\
+0\\
+\mu_{t}^{uom}\\
+\mu_{t}^{spf}
+\end{array}\right)}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The complete state ordering in the code is
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\left(\begin{array}{cccccccccccccccccccccccccccc}
+\Psi_{t} & \Psi_{t}^{*} & \Psi_{t-1}^{*} & \Psi_{t}^{EP} & \Psi_{t}^{EP*} & \mu_{t}^{\pi} & \Psi_{t}^{y} & \Psi_{t}^{y*} & \mu_{t}^{y} & \Psi_{t}^{e} & \Psi_{t}^{e*} & \mu_{t}^{e} & \Psi_{t}^{u} & \Psi_{t}^{u*} & \mu_{t}^{u} & \Psi_{t}^{oil} & \Psi_{t}^{oil*} & \mu_{t}^{oil} & \Psi_{t}^{\pi} & \Psi_{t}^{\pi*} & \Psi_{t}^{\pi^{c}} & \Psi_{t}^{\pi^{c}*} & \Psi_{t}^{uom} & \Psi_{t}^{uom*} & \mu_{t}^{uom} & \Psi_{t}^{spf} & \Psi_{t}^{spf*} & \mu_{t}^{spf}\end{array}\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+The simpel NK model in simulation excersize:
+\end_layout
+
+\begin_layout Standard
+Where I allow for correlation between 
+\begin_inset Formula $\Psi_{t}^{e}$
+\end_inset
+
+ and 
+\begin_inset Formula $\Psi_{t}^{\pi}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The most simple three obs version is
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\underset{obs}{\left(\begin{array}{c}
+y_{t}\\
+n_{t}\\
+\pi_{t}-\beta E_{t}\pi_{t+1}
+\end{array}\right)} & =\underset{obs.mat.Z}{\left(\begin{array}{ccc}
+1 & 1 & 0\\
+0 & \alpha & 0\\
+0 & \kappa & 1
+\end{array}\right)}\times\underset{states}{\left(\begin{array}{c}
+\mu_{t}^{e}\\
+\Psi_{t}^{e}\\
+\Psi_{t}^{\pi}
+\end{array}\right)}+\underset{noise}{\left(\begin{array}{c}
+\varepsilon_{t}^{y}\\
+\varepsilon_{t}^{n}\\
+\varepsilon_{t}^{\pi}
+\end{array}\right)}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The flex gap 
+\begin_inset Formula $\Psi^{f}$
+\end_inset
+
+ is then backed out as 
+\begin_inset Formula $\Psi_{t}^{e}+\frac{1}{\kappa}\Psi_{t}^{\pi}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The flex gap estimating version is
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\underset{obs}{\left(\begin{array}{c}
+y_{t}\\
+\pi_{t}-\beta E_{t}\pi_{t+1}
+\end{array}\right)} & =\underset{obs.mat.Z}{\left(\begin{array}{cc}
+1 & 1\\
+0 & \kappa
+\end{array}\right)}\times\underset{states}{\left(\begin{array}{c}
+\mu_{t}^{f}\\
+\Psi_{t}^{f}
+\end{array}\right)}+\underset{noise}{\left(\begin{array}{c}
+\varepsilon_{t}^{y}\\
+\varepsilon_{t}^{\pi}
+\end{array}\right)}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The efficient gap version is
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\underset{obs}{\left(\begin{array}{c}
+y_{t}\\
+n_{t}
+\end{array}\right)} & =\underset{obs.mat.Z}{\left(\begin{array}{cc}
+1 & 1\\
+0 & \alpha
+\end{array}\right)}\times\underset{states}{\left(\begin{array}{c}
+\mu_{t}^{e}\\
+\Psi_{t}^{e}
+\end{array}\right)}+\underset{noise}{\left(\begin{array}{c}
+\varepsilon_{t}^{y}\\
+\varepsilon_{t}^{n}
+\end{array}\right)}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Empirical Flex+Eff model
+\end_layout
+
+\begin_layout Standard
+I interpret the business cycle gap as the efficient output gap 
+\begin_inset Formula $\Psi_{t}^{e}\equiv y_{t}-y_{t}^{e}$
+\end_inset
+
+ and the ifnaltion cycle as
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\nospellcheck off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+ 
+\begin_inset Formula $\Psi_{t}^{\pi}\equiv\kappa(y_{t}^{e}-y_{t}^{f}$
+\end_inset
+
+) and then 
+\begin_inset Formula $y_{t}-y_{t}^{f}=\Psi_{t}^{e}+\frac{1}{\kappa}\Psi_{t}^{\pi}$
+\end_inset
+
+ with 
+\begin_inset Formula $\kappa=\delta_{\pi,1}-\delta_{E,1}$
+\end_inset
+
+.
+ I allow for correlation between 
+\begin_inset Formula $\Psi_{t}^{e}$
+\end_inset
+
+ and 
+\begin_inset Formula $\Psi_{t}^{\pi}$
+\end_inset
+
+- The Phillips curve I nest is 
+\begin_inset Formula $\pi_{t}=\beta E(\pi_{t+1})+\delta\pi_{t-1}+\kappa\Psi_{t}^{e}+u_{t,}$
+\end_inset
+
+with 
+\begin_inset Formula $u_{t}=\kappa(\Psi_{t}^{f}-\Psi_{t}^{e})$
+\end_inset
+
+ with 
+\begin_inset Formula $\Psi_{t}^{f}\equiv y_{t}-y_{t}^{f}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\underset{obs}{\left(\begin{array}{c}
+y_{t}/\sigma^{y}\\
+e_{t}/\sigma^{e}\\
+u_{t}/\sigma^{u}\\
+(\pi_{t}-F_{t}^{uom}\pi_{t+4})/\sigma^{UoM}\\
+(\pi_{t}-F_{t}^{spf}\pi_{t+4})/\sigma^{SPF}
+\end{array}\right)} & =Diag(1/\sigma)\times\underset{obs.mat.Z}{\left(\begin{array}{cccc}
+1 & 0 & 0 & 0\\
+\delta_{e,1} & \delta_{e,2} & 0 & 0\\
+\delta_{u,1} & \delta_{u,2} & 0 & 0\\
+\kappa & \delta & 1 & \gamma\\
+\kappa & \delta & 1 & \gamma
+\end{array}\right)}\times\underset{common\,states}{\left(\begin{array}{c}
+\Psi_{t}^{e}\\
+\Psi_{t}^{e*}\\
+\Psi_{t}^{\pi}\\
+\Psi_{t}^{\pi*}
+\end{array}\right)}+\underset{idio.cycles}{\left(\begin{array}{c}
+\Psi_{t}^{y}/\sigma^{y}\\
+\Psi_{t}^{e}/\sigma^{e}\\
+\Psi_{t}^{u}/\sigma^{u}\\
+\Psi_{t}^{uom}/\sigma^{UoM}\\
+\Psi_{t}^{spf}/\sigma^{SPF}
+\end{array}\right)}+\underset{idio.trends}{\left(\begin{array}{c}
+\mu_{t}^{y}/\sigma^{y}\\
+\mu_{t}^{e}/\sigma^{e}\\
+\mu_{t}^{u}/\sigma^{u}\\
+\mu_{t}^{uom}/\sigma^{uom}\\
+\mu_{t}^{spf}/\sigma^{spf}
+\end{array}\right)}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The complete state ordering in the code is
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\left(\begin{array}{ccccccccccccccccccc}
+\Psi_{t}^{e} & \Psi_{t}^{e*} & \Psi_{t}^{\pi} & \Psi_{t}^{*} & \Psi_{t}^{y} & \Psi_{t}^{y*} & \mu_{t}^{y} & \Psi_{t}^{e} & \Psi_{t}^{e*} & \mu_{t}^{e} & \Psi_{t}^{u} & \Psi_{t}^{u*} & \mu_{t}^{u} & \Psi_{t}^{uom} & \Psi_{t}^{uom*} & \mu_{t}^{uom} & \Psi_{t}^{spf} & \Psi_{t}^{spf*} & \mu_{t}^{spf}\end{array}\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+I get 
+\begin_inset Formula $\Psi^{\pi}$
+\end_inset
+
+and 
+\begin_inset Formula $\Psi^{e}$
+\end_inset
+
+ and back out 
+\begin_inset Formula $\Psi^{f}$
+\end_inset
+
+ as 
+\begin_inset Formula $\Psi^{f}=(\Psi^{e}+\frac{1}{\kappa}\Psi^{\pi})\cdot\sigma^{y}$
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Subsubsection
+No lag version
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\underset{obs}{\left(\begin{array}{c}
+y_{t}/\sigma^{y}\\
+e_{t}/\sigma^{e}\\
+u_{t}/\sigma^{u}\\
+(\pi_{t}-F_{t}^{uom}\pi_{t+4})/\sigma^{UoM}\\
+(\pi_{t}-F_{t}^{spf}\pi_{t+4})/\sigma^{SPF}
+\end{array}\right)} & =Diag(1/\sigma)\times\underset{obs.mat.Z}{\left(\begin{array}{cccc}
+1 & 0 & 0 & 0\\
+\delta_{e,1} & 0 & 0 & 0\\
+\delta_{u,1} & 0 & 0 & 0\\
+\kappa & 0 & 1 & 0\\
+\kappa & 0 & 1 & 0
+\end{array}\right)}\times\underset{common\,states}{\left(\begin{array}{c}
+\Psi_{t}^{e}\\
+\Psi_{t}^{e*}\\
+\Psi_{t}^{\pi}\\
+\Psi_{t}^{\pi*}
+\end{array}\right)}+\underset{idio.cycles}{\left(\begin{array}{c}
+\Psi_{t}^{y}/\sigma^{y}\\
+\Psi_{t}^{e}/\sigma^{e}\\
+\Psi_{t}^{u}/\sigma^{u}\\
+\Psi_{t}^{uom}/\sigma^{UoM}\\
+\Psi_{t}^{spf}/\sigma^{SPF}
+\end{array}\right)}+\underset{idio.trends}{\left(\begin{array}{c}
+\mu_{t}^{y}/\sigma^{y}\\
+\mu_{t}^{e}/\sigma^{e}\\
+\mu_{t}^{u}/\sigma^{u}\\
+\mu_{t}^{uom}/\sigma^{uom}\\
+\mu_{t}^{spf}/\sigma^{spf}
+\end{array}\right)}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+An inflation forecasting flex+eff model
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\underset{obs}{\left(\begin{array}{c}
+y_{t}\\
+e_{t}\\
+u_{t}\\
+\pi_{t}\\
+\pi_{t}^{c}\\
+F_{t}^{uom}\pi_{t+4}\\
+F_{t}^{spf}\pi_{t+4}
+\end{array}\right)} & =Diag(1/\sigma)\times\underset{obs.mat.Z}{\left(\begin{array}{ccccc}
+1 & 0 & 0 & 0 & 0\\
+\delta_{e,1} & \delta_{e,2} & 0 & 0 & 0\\
+\delta_{u,1} & \delta_{u,2} & 0 & 0 & 0\\
+\left(\delta_{E,1}+\kappa\right) & \left(\delta_{E,2}+\delta\right) & \left(\gamma_{E,1}+1\right) & \left(\gamma_{E,2}+\gamma\right)/\sigma^{\pi} & 1\\
+\left(\delta_{E,1}+\kappa\right) & \left(\delta_{E,2}+\delta\right) & \gamma_{c,1} & \gamma_{c,2} & 1\\
+\delta_{E,1} & \delta_{E,2} & \gamma_{E,1} & \gamma_{E,2} & 1\\
+\delta_{E,1} & \delta_{E,2} & \gamma_{E,1} & \gamma_{E,2} & 1
+\end{array}\right)}\times\underset{common\,states}{\left(\begin{array}{c}
+\Psi_{t}^{e}\\
+\Psi_{t}^{e*}\\
+\Psi_{t}^{\pi}\\
+\Psi_{t}^{\pi*}\\
+\mu_{t}^{\pi}
+\end{array}\right)}+\underset{idio.cycles}{\left(\begin{array}{c}
+\Psi_{t}^{y}\\
+\Psi_{t}^{e}\\
+\Psi_{t}^{u}\\
+\Psi_{t}^{\pi}\\
+\Psi_{t}^{\pi^{c}}\\
+\Psi_{t}^{UoM}\\
+\Psi_{t}^{spf}
+\end{array}\right)}+\underset{idio.trends}{\left(\begin{array}{c}
+\mu_{t}^{y}\\
+\mu_{t}^{e}\\
+\mu_{t}^{u}\\
+0\\
+0\\
+\mu_{t}^{uom}\\
+\mu_{t}^{spf}
+\end{array}\right)}
+\end{align*}
+
+\end_inset
+
+There is a scaling issue in the above right?
+ Should i divide with the scale in the other common paramets for infaltion obs?
+\end_layout
+
+\begin_layout Subsection
+Empirical Eff model
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\underset{obs}{\left(\begin{array}{c}
+y_{t}\\
+e_{t}\\
+u_{t}
+\end{array}\right)} & =\underset{obs.mat.Z}{\left(\begin{array}{cc}
+1 & 0\\
+\delta_{e,1} & \delta_{e,2}\\
+\delta_{u,1} & \delta_{u,2}
+\end{array}\right)}\times\underset{common\,states}{\left(\begin{array}{c}
+\Psi_{t}^{e}\\
+\Psi_{t}^{e*}
+\end{array}\right)}+\underset{idio.cycles}{\left(\begin{array}{c}
+\Psi_{t}^{y}\\
+\Psi_{t}^{e}\\
+\Psi_{t}^{u}
+\end{array}\right)}+\underset{idio.trends}{\left(\begin{array}{c}
+\mu_{t}^{y}\\
+\mu_{t}^{e}\\
+\mu_{t}^{u}
+\end{array}\right)}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Empirical Flex model
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\underset{obs}{\left(\begin{array}{c}
+y_{t}\\
+\pi_{t}-F_{t}^{uom}\pi_{t+4}\\
+\pi_{t}-F_{t}^{spf}\pi_{t+4}
+\end{array}\right)} & =\underset{obs.mat.Z}{\left(\begin{array}{cc}
+1 & 0\\
+\kappa & \delta\\
+\kappa & \delta
+\end{array}\right)}\times\underset{common\,states}{\left(\begin{array}{c}
+\Psi_{t}^{\pi}\\
+\Psi_{t}^{\pi*}
+\end{array}\right)}+\underset{idio.cycles}{\left(\begin{array}{c}
+\Psi_{t}^{y}\\
+\Psi_{t}^{uom}\\
+\Psi_{t}^{spf}
+\end{array}\right)}+\underset{idio.trends}{\left(\begin{array}{c}
+\mu_{t}^{y}\\
+\mu_{t}^{uom}\\
+\mu_{t}^{spf}
+\end{array}\right)}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\end_body
+\end_document
