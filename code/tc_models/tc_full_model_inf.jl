@@ -13,10 +13,10 @@ function tc_mwg(y, h, nDraws, burnin, mwg_const, σʸ)
      # -----------------------------------------------------------------------------------------------------------------
 
      d   = zeros(n);  # no intercepts
-     Z   = [ones(n) [0; ones(n-1)] [zeros(n-4); ones(4)] [zeros(4); ones(n-4)] [zeros(3); 1 ./ σʸ[end-3:end]]]; # the common factors in z
+     Z   = [ones(n) [0; ones(5)] [zeros(3); ones(3)] [zeros(3); ones(3)] [zeros(3); ones(3)]]; # the common factors in z
      Z1a = kron(Matrix(I, 3, 3), [1, 0, 1])';         # Idiosyncratic parts of y, e, u   (cycle plus trend)           # idio C, idio C+, idio trend
      Z1b = kron(Matrix(I, 2, 2), [1, 0, 1])';         # Idiosyncratic parts of inflation expectations (cycle plus trend)     # idio C, idio C+, idio trend
-     Z2  = kron(Matrix(I, 2, 2), [1, 0])';            # idiosyncratic parts of infaltion (only idiosyncratic cycle)          # idio C, idio C+
+     Z2  = kron(Matrix(I, 1, 1), [1, 0])';            # idiosyncratic parts of infaltion (only idiosyncratic cycle)          # idio C, idio C+
 
      Z  = [Z ex_blkdiag(Z1a, Z2, Z1b)];
      R  = zeros(n, n);         # no observation noise      # irregular components
@@ -27,8 +27,8 @@ function tc_mwg(y, h, nDraws, burnin, mwg_const, σʸ)
      R_ind = R .!= 0;  # no observation noise to be estimated
 
      # Projections
-     Z_ind[[2,3,4,6], [1,2]] .= true; # All        -> PC cycle, t and t-1  # business cycle and first lag loads on all 8 observations but with unity on y (first observation)
-     Z_ind[[5,6],[3,4]]     .= true; # Expect.    -> PC cycle, t-2   # busines cycle lag 2 loads on expectations only
+     Z_ind[[2,3,4,5], [1,2]] .= true; # All        -> PC cycle, t and t-1  # business cycle and first lag loads on all 8 observations but with unity on y (first observation)
+     Z_ind[[5],[3,4]]     .= true; # Expect.    -> PC cycle, t-2   # busines cycle lag 2 loads on expectations only
      Z_ind[4, 4] = true; # Prices     -> EP cycle, t and t-1  # energy cycle and first lag loads on oil (4th), infaltion expectations (5-6th) and inflation (7-8th) but with unity on oil
 
      # Z_plus_ind and Z_minus_ind (not used here)
@@ -48,8 +48,8 @@ function tc_mwg(y, h, nDraws, burnin, mwg_const, σʸ)
      T_ct    = convert(Array{Float64, 2}, [1 0 0; 0 0 0; 0 0 1]); # 2*2 transition block for cycle C and C+ plus trend
      Q_c_ext = convert(Array{Float64, 2}, [1 0 0; 0 0 0; 0 0 0]);
 
-     T = cat(dims=[1,2], T_c, [T_ct for i=1:4]..., [T_c for i=1:2]..., [T_ct for i=1:2]...); # PC(cycle), EP(cycle+trend),y(cycle+trend), e(cycle+trend), u(cycle+trend), inf(cycle), inf^c(cycle), UoM(cycle+trend), SPF(cycle+trend)
-     Q = cat(dims=[1,2], T_c, [T_ct for i=1:4]..., [T_c for i=1:2]..., [T_ct for i=1:2]...); 
+     T = cat(dims=[1,2], T_c, [T_ct for i=1:4]..., [T_c for i=1:1]..., [T_ct for i=1:2]...); # PC(cycle), EP(cycle+trend),y(cycle+trend), e(cycle+trend), u(cycle+trend), inf(cycle), inf^c(cycle), UoM(cycle+trend), SPF(cycle+trend)
+     Q = cat(dims=[1,2], T_c, [T_ct for i=1:4]..., [T_c for i=1:1]..., [T_ct for i=1:2]...); 
 
      # Indeces for transition equations
      c_ind = c .!= 0;  # estimate drifts of gdp and employment trends
@@ -63,7 +63,7 @@ function tc_mwg(y, h, nDraws, burnin, mwg_const, σʸ)
      # Initial conditions for the non-stationary states
      P̄_c   = convert(Array{Float64, 2}, [0 0; 0 0]);
      P̄_ct  = convert(Array{Float64, 2}, [0 0 0; 0 0 0; 0 0 1]);
-     P̄¹    = cat(dims=[1,2], [P̄_c for i=1:1]..., [P̄_ct for i=1:4]..., [P̄_c for i=1:2]..., [P̄_ct for i=1:2]...); # trends have diffuse initial conditions
+     P̄¹    = cat(dims=[1,2], [P̄_c for i=1:1]..., [P̄_ct for i=1:4]..., [P̄_c for i=1:1]..., [P̄_ct for i=1:2]...); # trends have diffuse initial conditions
 
      # Initial conditions
      α¹ = zeros(size(c));
@@ -72,7 +72,7 @@ function tc_mwg(y, h, nDraws, burnin, mwg_const, σʸ)
      # Trigonometric states (indicates where the 2*2 cycle blocks start in T and Q. Needed to fill T and Q in set_par)
      λ_c   = convert(Array{Float64, 1}, [1; 0]);  
      λ_ct  = convert(Array{Float64, 1}, [1; 0; 0]);
-     λ     = vcat([1; 0], [λ_ct for i=1:4]..., [λ_c for i=1:2]..., [λ_ct for i=1:2]...);
+     λ     = vcat([1; 0], [λ_ct for i=1:4]..., [λ_c for i=1:1]..., [λ_ct for i=1:2]...);
      ρ     = copy(λ);
      λ_ind = λ .!= 0;
      ρ_ind = copy(λ_ind);

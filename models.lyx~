@@ -541,7 +541,6 @@ y_{t}\\
 e_{t}\\
 u_{t}\\
 \pi_{t}\\
-\pi_{t}^{c}\\
 F_{t}^{uom}\pi_{t+4}\\
 F_{t}^{spf}\pi_{t+4}
 \end{array}\right)} & =Diag(1/\sigma)\times\underset{obs.mat.Z}{\left(\begin{array}{ccccc}
@@ -549,7 +548,6 @@ F_{t}^{spf}\pi_{t+4}
 \delta_{e,1} & \delta_{e,2} & 0 & 0 & 0\\
 \delta_{u,1} & \delta_{u,2} & 0 & 0 & 0\\
 \left(\delta_{E,1}+\kappa\right) & \left(\delta_{E,2}+\delta\right) & \left(\gamma_{E,1}+1\right) & \left(\gamma_{E,2}+\gamma\right)/\sigma^{\pi} & 1\\
-\left(\delta_{E,1}+\kappa\right) & \left(\delta_{E,2}+\delta\right) & \gamma_{c,1} & \gamma_{c,2} & 1\\
 \delta_{E,1} & \delta_{E,2} & \gamma_{E,1} & \gamma_{E,2} & 1\\
 \delta_{E,1} & \delta_{E,2} & \gamma_{E,1} & \gamma_{E,2} & 1
 \end{array}\right)}\times\underset{common\,states}{\left(\begin{array}{c}
@@ -563,14 +561,12 @@ F_{t}^{spf}\pi_{t+4}
 \Psi_{t}^{e}\\
 \Psi_{t}^{u}\\
 \Psi_{t}^{\pi}\\
-\Psi_{t}^{\pi^{c}}\\
 \Psi_{t}^{UoM}\\
 \Psi_{t}^{spf}
 \end{array}\right)}+\underset{idio.trends}{\left(\begin{array}{c}
 \mu_{t}^{y}\\
 \mu_{t}^{e}\\
 \mu_{t}^{u}\\
-0\\
 0\\
 \mu_{t}^{uom}\\
 \mu_{t}^{spf}

@@ -547,7 +547,7 @@ F_{t}^{spf}\pi_{t+4}
 1 & 0 & 0 & 0 & 0\\
 \delta_{e,1} & \delta_{e,2} & 0 & 0 & 0\\
 \delta_{u,1} & \delta_{u,2} & 0 & 0 & 0\\
-\left(\delta_{E,1}+\kappa\right) & \left(\delta_{E,2}+\delta\right) & \left(\gamma_{E,1}+1\right) & \left(\gamma_{E,2}+\gamma\right)/\sigma^{\pi} & 1\\
+\left(\delta_{E,1}+\kappa\right) & \left(\delta_{E,2}+\delta\right) & \left(\gamma_{E,1}+1\right) & \left(\gamma_{E,2}+\gamma\right) & 1\\
 \delta_{E,1} & \delta_{E,2} & \gamma_{E,1} & \gamma_{E,2} & 1\\
 \delta_{E,1} & \delta_{E,2} & \gamma_{E,1} & \gamma_{E,2} & 1
 \end{array}\right)}\times\underset{common\,states}{\left(\begin{array}{c}
@@ -575,8 +575,104 @@ F_{t}^{spf}\pi_{t+4}
 
 \end_inset
 
-There is a scaling issue in the above right?
- Should i divide with the scale in the other common paramets for infaltion obs?
+
+\end_layout
+
+\begin_layout Subsubsection
+No lag version
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\underset{obs}{\left(\begin{array}{c}
+y_{t}\\
+e_{t}\\
+u_{t}\\
+\pi_{t}\\
+F_{t}^{uom}\pi_{t+4}\\
+F_{t}^{spf}\pi_{t+4}
+\end{array}\right)} & =Diag(1/\sigma)\times\underset{obs.mat.Z}{\left(\begin{array}{ccccc}
+1 & 0 & 0 & 0 & 0\\
+\delta_{e,1} & 0 & 0 & 0 & 0\\
+\delta_{u,1} & 0 & 0 & 0 & 0\\
+\left(\delta_{E,1}+\kappa\right) & 0 & \left(\gamma_{E,1}+1\right) & 0 & 1\\
+\delta_{E,1} & 0 & \gamma_{E,1} & 0 & 1\\
+\delta_{E,1} & 0 & \gamma_{E,1} & 0 & 1
+\end{array}\right)}\times\underset{common\,states}{\left(\begin{array}{c}
+\Psi_{t}^{e}\\
+\Psi_{t}^{e*}\\
+\Psi_{t}^{\pi}\\
+\Psi_{t}^{\pi*}\\
+\mu_{t}^{\pi}
+\end{array}\right)}+\underset{idio.cycles}{\left(\begin{array}{c}
+\Psi_{t}^{y}\\
+\Psi_{t}^{e}\\
+\Psi_{t}^{u}\\
+\Psi_{t}^{\pi}\\
+\Psi_{t}^{UoM}\\
+\Psi_{t}^{spf}
+\end{array}\right)}+\underset{idio.trends}{\left(\begin{array}{c}
+\mu_{t}^{y}\\
+\mu_{t}^{e}\\
+\mu_{t}^{u}\\
+0\\
+\mu_{t}^{uom}\\
+\mu_{t}^{spf}
+\end{array}\right)}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+Mapping to Baseline model
+\end_layout
+
+\begin_layout Standard
+The baseline 5 observation model can be written using the states of the extenden 6 observation model as
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\underset{obs}{\left(\begin{array}{c}
+y_{t}/\sigma^{y}\\
+e_{t}/\sigma^{e}\\
+u_{t}/\sigma^{u}\\
+(\pi_{t}-F_{t}^{uom}\pi_{t+4})/\sigma^{UoM}\\
+(\pi_{t}-F_{t}^{spf}\pi_{t+4})/\sigma^{SPF}
+\end{array}\right)} & =Diag(1/\sigma)\times\underset{obs.mat.Z}{\left(\begin{array}{cccc}
+1 & 0 & 0 & 0\\
+\delta_{e,1} & \delta_{e,2} & 0 & 0\\
+\delta_{u,1} & \delta_{u,2} & 0 & 0\\
+\kappa & \delta & 1 & \gamma\\
+\kappa & \delta & 1 & \gamma
+\end{array}\right)}\times\underset{common\,states}{\left(\begin{array}{c}
+\Psi_{t}^{e}\\
+\Psi_{t}^{e*}\\
+\Psi_{t}^{\pi}\\
+\Psi_{t}^{\pi*}
+\end{array}\right)}+\underset{idio.cycles}{\left(\begin{array}{c}
+\Psi_{t}^{y}/\sigma^{y}\\
+\Psi_{t}^{e}/\sigma^{e}\\
+\Psi_{t}^{u}/\sigma^{u}\\
+(\Psi_{t}^{\pi}-\Psi_{t}^{uom})/\sigma^{UoM}\\
+(\Psi_{t}^{\pi}-\Psi_{t}^{spf})/\sigma^{SPF}
+\end{array}\right)}+\underset{idio.trends}{\left(\begin{array}{c}
+\mu_{t}^{y}/\sigma^{y}\\
+\mu_{t}^{e}/\sigma^{e}\\
+\mu_{t}^{u}/\sigma^{u}\\
+-\mu_{t}^{uom}/\sigma^{uom}\\
+-\mu_{t}^{spf}/\sigma^{spf}
+\end{array}\right)}
+\end{align*}
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Subsection

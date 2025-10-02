@@ -57,10 +57,9 @@ function read_data(data_path::AbstractString, model::AbstractString)
         # drop 4th element (OIL), 5th element (CPI) and 7th element (Core CPI)
         MNEMONIC = vcat(MNEMONIC[1:3], MNEMONIC[6:7]);
         
-    elseif model == "full_inf"
+    elseif model == "full_inf" || model == "full_inf_no_lags"
         # Pull the level series (as Float64/ Missing vectors)
         y   = Vector{Union{Missing, Float64}}(fQ[rows, gdp])
-        y = log.(y)*100
         e   = Vector{Union{Missing, Float64}}(fQ[rows, employment])
         u   = Vector{Union{Missing, Float64}}(fQ[rows, unemployment])
         π   = Vector{Union{Missing, Float64}}(fQ[rows, inflation])
@@ -68,9 +67,11 @@ function read_data(data_path::AbstractString, model::AbstractString)
         uom = Vector{Union{Missing, Float64}}(fQ[rows, UoM])
         spf = Vector{Union{Missing, Float64}}(fQ[rows, SPF])
 
+        y = log.(y)*100
+        e = log.(e)*100
 
         # Final matrix: 7 columns 
-        data_quarterly = hcat(y, e, u, π, core_π, uom, spf)
+        data_quarterly = hcat(y, e, u, π, uom, spf)
 
         info_data = DataFrame(XLSX.readtable(data_path, "transf"))
         MNEMONIC  = info_data[1:end, 2] |> Array{String,1};

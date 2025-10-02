@@ -4,7 +4,7 @@
 # Initial settings
 # ----------------------------------------------------------------------------------------------------------------------
 # choose model
-model = "full" # "full", "inflation", "employment", "employment+inflation", "flex", "efficient", "full_inf", "full_no_lags"
+model = "full" # "full", "inflation", "employment", "employment+inflation", "flex", "efficient", "full_inf", "full_no_lags", "full_inf_no_lags"
 
 using Distributed;
 include("code/read_data.jl");
@@ -31,6 +31,8 @@ elseif model == "efficient"
       
 elseif model == "full_inf"
         include("code/tc_models/tc_full_model_inf.jl");
+elseif model == "full_inf_no_lags"
+        include("code/tc_models/tc_full_model_inf_no_lags.jl");
        
 else
     error("Model not recognized. Choose either 'full', 'inflation', 'employment' or 'employment+inflation'.")
