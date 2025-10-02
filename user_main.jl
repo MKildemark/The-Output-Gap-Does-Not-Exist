@@ -4,7 +4,7 @@
 # Initial settings
 # ----------------------------------------------------------------------------------------------------------------------
 # choose model
-model = "full" # "full", "inflation", "employment", "employment+inflation", "flex", "efficient", "full_inf", "full_no_lags", "full_inf_no_lags"
+model = "full_inf_no_lags" # "full", "inflation", "employment", "employment+inflation", "flex", "efficient", "full_inf", "full_no_lags", "full_inf_no_lags"
 
 using Distributed;
 include("code/read_data.jl");
