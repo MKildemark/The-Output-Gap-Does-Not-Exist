@@ -33,31 +33,8 @@ function read_data(data_path::AbstractString, model::AbstractString)
     date = fQ[rows, dates]|> Array{Date,1}
     
 
-    if model == "full" || model == "full_no_lags"
-        # Pull the level series (as Float64/ Missing vectors)
-        y   = Vector{Union{Missing, Float64}}(fQ[rows, gdp])
-        e   = Vector{Union{Missing, Float64}}(fQ[rows, employment])
-        u   = Vector{Union{Missing, Float64}}(fQ[rows, unemployment])
-        π   = Vector{Union{Missing, Float64}}(fQ[rows, inflation])
-        uom = Vector{Union{Missing, Float64}}(fQ[rows, UoM])
-        spf = Vector{Union{Missing, Float64}}(fQ[rows, SPF])
-
-        y = log.(y)*100
-        e = log.(e)*100
-
-        # Build the difference series elementwise
-        π_minus_uom = π .- uom       # π_t − E_t^{UoM} π_{t+4}
-        π_minus_spf = π .- spf       # π_t − E_t^{SPF} π_{t+4}
-
-        # Final matrix: 5 columns 
-        data_quarterly = hcat(y, e, u, π_minus_uom, π_minus_spf)
-
-        info_data = DataFrame(XLSX.readtable(data_path, "transf"))
-        MNEMONIC  = info_data[1:end, 2] |> Array{String,1};
-        # drop 4th element (OIL), 5th element (CPI) and 7th element (Core CPI)
-        MNEMONIC = vcat(MNEMONIC[1:3], MNEMONIC[6:7]);
-        
-    elseif model == "full_inf" || model == "full_inf_no_lags"
+ 
+    if model == "two_gap_AR1_6_obs" || model == "two_gap_AR2_6_obs" || model == "okun_kuttner_AR2_6_obs" || model == "okun_kuttner_AR1_6_obs"
         # Pull the level series (as Float64/ Missing vectors)
         y   = Vector{Union{Missing, Float64}}(fQ[rows, gdp])
         e   = Vector{Union{Missing, Float64}}(fQ[rows, employment])
@@ -72,49 +49,13 @@ function read_data(data_path::AbstractString, model::AbstractString)
 
         # Final matrix: 7 columns 
         data_quarterly = hcat(y, e, u, π, uom, spf)
+        # data_quarterly = hcat(y, e, u, π, spf)
 
         info_data = DataFrame(XLSX.readtable(data_path, "transf"))
         MNEMONIC  = info_data[1:end, 2] |> Array{String,1};
         MNEMONIC = vcat(MNEMONIC[1:3], MNEMONIC[6:8]);
-    elseif model == "inflation"
-        # Pull the level series (as Float64/ Missing vectors)
-        y   = Vector{Union{Missing, Float64}}(fQ[rows, gdp])
-        y = log.(y)*100
-        π   = Vector{Union{Missing, Float64}}(fQ[rows, inflation])
 
-        # Final matrix: 2 columns 
-        data_quarterly = hcat(y, π)
-
-        info_data = DataFrame(XLSX.readtable(data_path, "transf"))
-        MNEMONIC  = info_data[1:end, 2] |> Array{String,1};
-        MNEMONIC = vcat(MNEMONIC[1:2], MNEMONIC[6]);
-    elseif model == "employment"
-        # Pull the level series (as Float64/ Missing vectors)
-        y   = Vector{Union{Missing, Float64}}(fQ[rows, employment])
-        y = log.(y)
-        u   = Vector{Union{Missing, Float64}}(fQ[rows, unemployment])
-
-        # Final matrix: 2 columns
-        data_quarterly = hcat(y, u)
-
-        info_data = DataFrame(XLSX.readtable(data_path, "transf"))
-        MNEMONIC  = info_data[1:end, 2] |> Array{String,1};
-        MNEMONIC = vcat(MNEMONIC[1:2], MNEMONIC[4]);
-    elseif model == "employment+inflation"
-        # Pull the level series (as Float64/ Missing vectors)
-        y   = Vector{Union{Missing, Float64}}(fQ[rows, employment])
-        y = log.(y)*100
-        u   = Vector{Union{Missing, Float64}}(fQ[rows, unemployment])
-        π   = Vector{Union{Missing, Float64}}(fQ[rows, inflation])
-
-        # Final matrix: 3 columns 
-        data_quarterly = hcat(y, u, π)
-
-        info_data = DataFrame(XLSX.readtable(data_path, "transf"))
-        MNEMONIC  = info_data[1:end, 2] |> Array{String,1};
-        MNEMONIC = vcat(MNEMONIC[1:2], MNEMONIC[4], MNEMONIC[6]);
-    
-    elseif model == "flex"
+    elseif model == "kuttner_AR2_4_obs"  || model == "kuttner_AR1_4_obs"
         # Pull the level series (as Float64/ Missing vectors)
         y   = Vector{Union{Missing, Float64}}(fQ[rows, gdp])
         y = log.(y)*100
@@ -122,34 +63,54 @@ function read_data(data_path::AbstractString, model::AbstractString)
         uom = Vector{Union{Missing, Float64}}(fQ[rows, UoM])
         spf = Vector{Union{Missing, Float64}}(fQ[rows, SPF])
 
-        # Build the difference series elementwise
-        π_minus_uom = π .- uom       # π_t − E_t^{UoM} π_{t+4}
-        π_minus_spf = π .- spf       # π_t − E_t^{SPF} π_{t+4}
+        # Final matrix: 3 columns 
+        data_quarterly = hcat(y, π, uom, spf)
 
-        # Final matrix: 5 columns in the requested order
-        data_quarterly = hcat(y, π_minus_uom, π_minus_spf)
-
-        info_data = DataFrame(XLSX.readtable(data_path, "transf"))
+         info_data = DataFrame(XLSX.readtable(data_path, "transf"))
         MNEMONIC  = info_data[1:end, 2] |> Array{String,1};
-        MNEMONIC = vcat(MNEMONIC[1:3], MNEMONIC[6:7]);
+        MNEMONIC = vcat(MNEMONIC[1:2], MNEMONIC[6]);
 
-    elseif model == "efficient"
+
+    elseif model == "kuttner_AR2_3_obs"
         # Pull the level series (as Float64/ Missing vectors)
         y   = Vector{Union{Missing, Float64}}(fQ[rows, gdp])
         y = log.(y)*100
-        e   = Vector{Union{Missing, Float64}}(fQ[rows, employment])
-        u   = Vector{Union{Missing, Float64}}(fQ[rows, unemployment])
-       
+        π   = Vector{Union{Missing, Float64}}(fQ[rows, inflation])
+        uom = Vector{Union{Missing, Float64}}(fQ[rows, UoM])
+        spf = Vector{Union{Missing, Float64}}(fQ[rows, SPF])
 
-        # Final matrix: 5 columns in the requested order
-        data_quarterly = hcat(y, e, u)
+
+        # Final matrix: 2 columns 
+        data_quarterly = hcat(y, π, uom)
+        # data_quarterly = hcat(y, π, uom)
+        # data_quarterly = hcat(y, π);
 
         info_data = DataFrame(XLSX.readtable(data_path, "transf"))
         MNEMONIC  = info_data[1:end, 2] |> Array{String,1};
-        MNEMONIC = vcat(MNEMONIC[1:3], MNEMONIC[6:7]);
+        MNEMONIC = vcat(MNEMONIC[1:2], MNEMONIC[6]);
+
+
+    elseif model == "okun_kuttner_AR2_4_obs" || model == "two_gap_AR1_4_obs" || model == "two_gap_AR2_4_obs"
+        # Pull the level series (as Float64/ Missing vectors)
+        y   = Vector{Union{Missing, Float64}}(fQ[rows, employment])
+        y = log.(y)*100
+        u   = Vector{Union{Missing, Float64}}(fQ[rows, unemployment])
+        π   = Vector{Union{Missing, Float64}}(fQ[rows, inflation])
+        uom = Vector{Union{Missing, Float64}}(fQ[rows, UoM])
+        spf = Vector{Union{Missing, Float64}}(fQ[rows, SPF])
+
+        # Final matrix: 3 columns 
+        # data_quarterly = hcat(y, u, π, spf)
+        data_quarterly = hcat(y, u, π, uom)
+
+        info_data = DataFrame(XLSX.readtable(data_path, "transf"))
+        MNEMONIC  = info_data[1:end, 2] |> Array{String,1};
+        MNEMONIC = vcat(MNEMONIC[1:2], MNEMONIC[4], MNEMONIC[6]);
+
+
 
     else
-        error("Model not recognized. Choose either 'full' or 'simple'.")
+        error("Model not recognized")
 
        
     end

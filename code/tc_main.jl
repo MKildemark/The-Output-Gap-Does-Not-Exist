@@ -163,7 +163,7 @@ function tc_oos_run(data::Matrix{Union{Float64, Missing}}, date::Vector{Date}, n
     # ----- Run the out-of-sample -----
 
     for t=end_presample:end_oos
-
+        print("Out-of-sample iteration > ", t-end_presample+1, " (out of ", oos_length, ")\n");
         # Prepare the data
         data_t = data_full[1:t, :];
         σʸ = standardise_data!(data_t, nM, nQ);

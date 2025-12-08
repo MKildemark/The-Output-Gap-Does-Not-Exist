@@ -33,6 +33,7 @@ module MetropolisWithinGibbs
 		c::Union{Array{X, 1}}
 		T::Union{Array{X, 1}, Array{X, 2}}
 		Q::Union{Array{X, 1}, Array{X, 2}}
+		H::Union{Array{X, 1}, Array{X, 2}}
 		α¹::Union{Array{X, 1}}
 		P¹::Union{Array{X, 1}, Array{X, 2}}
 		P̄¹::Union{Array{X, 1}, Array{X, 2}}
@@ -53,6 +54,7 @@ module MetropolisWithinGibbs
 		T::X
 		Q::X
 		Q_cov::X
+		H::X
 		λ::X
 		ρ::X
 		θ::X
@@ -70,6 +72,7 @@ module MetropolisWithinGibbs
 		T::X2
 		Q::X2
 		Q_cov::X2
+		H::X2
 		λ::X1
 		ρ::X1
 	end
@@ -79,6 +82,7 @@ module MetropolisWithinGibbs
 		N_plus::Distributions.Truncated{Normal{X}, Continuous, X}
 		N_minus::Distributions.Truncated{Normal{X}, Continuous, X}
 		IG::Distributions.InverseGamma{X}
+		T::X
 		λ::X
 		ρ::X
 		corr::X

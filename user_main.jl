@@ -4,48 +4,35 @@
 # Initial settings
 # ----------------------------------------------------------------------------------------------------------------------
 # choose model
-model = "full_inf_no_lags" # "full", "inflation", "employment", "employment+inflation", "flex", "efficient", "full_inf", "full_no_lags", "full_inf_no_lags"
+model = "okun_kuttner_AR1_6_obs" # "kuttner_AR2_3_obs", "kuttner_AR2_4_obs", "okun_kuttner_AR2_4_obs",  "okun_kuttner_AR2_6_obs",  "two_gap_AR1_6_obs", "two_gap_AR2_6_obs", "two_gap_AR1_4_obs"
 
 using Distributed;
+using Base.Threads;
 include("code/read_data.jl");
-if model == "full"
-        include("code/tc_models/tc_full_model.jl");
-
-elseif model == "full_no_lags"
-        include("code/tc_models/tc_full_no_lags.jl")
-        
-elseif model == "inflation"
-        include("code/tc_models/tc_inflation_model.jl");
-
-elseif model == "employment"
-        include("code/tc_models/tc_employment_model.jl");
-
-elseif model == "employment+inflation"
-        include("code/tc_models/tc_employment_inflation_model.jl");
-  
-elseif model == "flex"
-        include("code/tc_models/tc_flex_gap.jl");
-
-elseif model == "efficient"
-        include("code/tc_models/tc_efficient_gap.jl");
-      
-elseif model == "full_inf"
-        include("code/tc_models/tc_full_model_inf.jl");
-elseif model == "full_inf_no_lags"
-        include("code/tc_models/tc_full_model_inf_no_lags.jl");
-       
-else
-    error("Model not recognized. Choose either 'full', 'inflation', 'employment' or 'employment+inflation'.")
-end
+include("code/tc_models/tc_$(model).jl");
 
 @everywhere include("code/Metropolis-Within-Gibbs/MetropolisWithinGibbs.jl")
 @everywhere using DataFrames, Dates, FileIO, JLD2, LinearAlgebra, Random, Statistics, XLSX;
 @everywhere using Main.MetropolisWithinGibbs;
 
-res_name = model
-data_path = "./data/inflation.xlsx"; # Data file
+# 1. Single iteration: it executes the code using the most updated datapoints
+# 2. Conditional forecast (you need to run option 1 first)
+# 3. Out-of-sample: out-of-sample exercise, forecasting period starts after end_presample_vec
+run_type = 1;
+
+
+if run_type == 1
+	res_name = "$(model)_iis"
+elseif run_type == 2
+	res_name = "$(model)_cond"
+elseif run_type == 3
+	res_name = "$(model)_oos"
+end
+res_name_iis = "$(model)_iis";
+
+data_path = "./data/inflation_2025.xlsx"; # Data file
 end_presample_vec = [31, 12, 1998]; # End presample, day/month/year [it is used when run_type is 2 or 3]
-h = 0; # forecast horizon [it is used when run_type is 1 or 3]
+h = 8; # forecast horizon [it is used when run_type is 1 or 3]
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -58,7 +45,7 @@ mwg_const = [0.025; 0.25]; # Initial constant. mwg_const might be adjusted to ge
 
 
 
-run_type = 1; # 1: single iteration; 2: out-of-sample; 3: conditional forecasts
+
 cond = [];
 
 # Load data
