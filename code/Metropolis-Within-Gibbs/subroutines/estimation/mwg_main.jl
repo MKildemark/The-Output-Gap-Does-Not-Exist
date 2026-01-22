@@ -72,7 +72,7 @@ function mwg_main(par::ParSsm, h::Int64, nDraws::Array{Int64, 1}, burnin::Array{
      MAX_coeff_minus = 0;
      MAX_λ           = pi;
      MAX_ρ           = 0.99;
-     MAX_corr      = 0.0;
+     MAX_corr      = 0.01;
      
 
      # MIN

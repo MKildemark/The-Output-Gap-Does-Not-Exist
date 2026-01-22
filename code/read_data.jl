@@ -24,6 +24,9 @@ function read_data(data_path::AbstractString, model::AbstractString)
     core_inflation = 8               # not used
     UoM            = 9               # E_t^{UoM} π_{t+4}
     SPF            = 10              # E_t^{SPF} π_{t+4}
+    ten_year_inflation = 11          # E_t^{LT} π_{t+40}
+    one_year_inflation = 12          # E_t^{ST} π_{t+4}
+    thirty_year_inflation = 13      # E_t^{VLT} π_{t+120}
 
 
     fQ = DataFrame(XLSX.readtable(data_path, "quarterly"))
@@ -34,7 +37,7 @@ function read_data(data_path::AbstractString, model::AbstractString)
     
 
  
-    if model == "two_gap_AR1_6_obs" || model == "two_gap_AR2_6_obs" || model == "okun_kuttner_AR2_6_obs" || model == "okun_kuttner_AR1_6_obs"
+    if model ==  "two_gap_AR2_6_obs" || model == "okun_kuttner_AR2_6_obs" || model == "rational_short" || model == "rational_short_noise"
         # Pull the level series (as Float64/ Missing vectors)
         y   = Vector{Union{Missing, Float64}}(fQ[rows, gdp])
         e   = Vector{Union{Missing, Float64}}(fQ[rows, employment])
@@ -55,7 +58,7 @@ function read_data(data_path::AbstractString, model::AbstractString)
         MNEMONIC  = info_data[1:end, 2] |> Array{String,1};
         MNEMONIC = vcat(MNEMONIC[1:3], MNEMONIC[6:8]);
 
-    elseif model == "kuttner_AR2_4_obs"  || model == "kuttner_AR1_4_obs"
+    elseif model == "kuttner_AR2_4_obs"  
         # Pull the level series (as Float64/ Missing vectors)
         y   = Vector{Union{Missing, Float64}}(fQ[rows, gdp])
         y = log.(y)*100
@@ -70,45 +73,24 @@ function read_data(data_path::AbstractString, model::AbstractString)
         MNEMONIC  = info_data[1:end, 2] |> Array{String,1};
         MNEMONIC = vcat(MNEMONIC[1:2], MNEMONIC[6]);
 
-
-    elseif model == "kuttner_AR2_3_obs"
+    elseif model == "rational_long" || model == "rational_long_noise"
         # Pull the level series (as Float64/ Missing vectors)
         y   = Vector{Union{Missing, Float64}}(fQ[rows, gdp])
-        y = log.(y)*100
-        π   = Vector{Union{Missing, Float64}}(fQ[rows, inflation])
-        uom = Vector{Union{Missing, Float64}}(fQ[rows, UoM])
-        spf = Vector{Union{Missing, Float64}}(fQ[rows, SPF])
-
-
-        # Final matrix: 2 columns 
-        data_quarterly = hcat(y, π, uom)
-        # data_quarterly = hcat(y, π, uom)
-        # data_quarterly = hcat(y, π);
-
-        info_data = DataFrame(XLSX.readtable(data_path, "transf"))
-        MNEMONIC  = info_data[1:end, 2] |> Array{String,1};
-        MNEMONIC = vcat(MNEMONIC[1:2], MNEMONIC[6]);
-
-
-    elseif model == "okun_kuttner_AR2_4_obs" || model == "two_gap_AR1_4_obs" || model == "two_gap_AR2_4_obs"
-        # Pull the level series (as Float64/ Missing vectors)
-        y   = Vector{Union{Missing, Float64}}(fQ[rows, employment])
-        y = log.(y)*100
+        e   = Vector{Union{Missing, Float64}}(fQ[rows, employment])
         u   = Vector{Union{Missing, Float64}}(fQ[rows, unemployment])
         π   = Vector{Union{Missing, Float64}}(fQ[rows, inflation])
+        core_π = Vector{Union{Missing, Float64}}(fQ[rows, core_inflation])
         uom = Vector{Union{Missing, Float64}}(fQ[rows, UoM])
         spf = Vector{Union{Missing, Float64}}(fQ[rows, SPF])
+        lt_inflation = Vector{Union{Missing, Float64}}(fQ[rows, thirty_year_inflation])
 
-        # Final matrix: 3 columns 
-        # data_quarterly = hcat(y, u, π, spf)
-        data_quarterly = hcat(y, u, π, uom)
+        y = log.(y)*100
+        e = log.(e)*100
 
-        info_data = DataFrame(XLSX.readtable(data_path, "transf"))
-        MNEMONIC  = info_data[1:end, 2] |> Array{String,1};
-        MNEMONIC = vcat(MNEMONIC[1:2], MNEMONIC[4], MNEMONIC[6]);
+        # Final matrix: 
+        data_quarterly = hcat(y, e, u, π, lt_inflation)
 
-
-
+   
     else
         error("Model not recognized")
 

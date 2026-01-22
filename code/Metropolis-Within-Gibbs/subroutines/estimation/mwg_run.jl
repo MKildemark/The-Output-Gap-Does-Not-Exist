@@ -81,41 +81,51 @@ function mwg_run(θ_unb::Array{Float64,1}, par::ParSsm, h::Int64, par_ind::BoolP
 
           if apriori_rejection[1] == 0
 
-               # Accept / Reject
+                 # Accept / Reject
                if rand(Uniform(0, 1)) < exp(par_prop.logposterior-par.logposterior)
 
                     # Accept the proposed state-space parameters
-                    # - Copy the fields of par_prop in par (in parallel)
-                    begin
-                         par_list = Array{Any}(undef, n_fields);
+                    par = ParSsm((copy(getfield(par_prop, k)) for k in fieldnames(typeof(par_prop)))...)
+                    θ_unb   = copy(θ_prop_unb)
+                    θ_bound = copy(θ_prop_bound)
 
-                         for i=1:n_iter
-
-                              # Set end for the sync loop
-                              end_sync_loop = n_workers;
-                              if i*n_workers > n_fields
-                                   end_sync_loop = n_fields-(i-1)*n_iter;
-                              end
-
-                              @sync for j=1:end_sync_loop
-
-                                   ind_par = j+(i-1)*n_workers;
-
-                                   # @async remotecall_fetch
-                                   @async par_list[ind_par] =
-                                        remotecall_fetch(copy, workers_vec[j], getfield(par_prop, j+(i-1)*n_workers));
-                              end
-                         end
-                    end
-
-                    par = ParSsm(par_list...);
-
-                    # Copy θ_unb and θ_bound in parallel
-                    @sync begin
-                         @async θ_unb   = remotecall_fetch(copy, workers_vec[1], θ_prop_unb);
-                         @async θ_bound = remotecall_fetch(copy, workers_vec[2], θ_prop_bound);
-                    end
                end
+
+               # # Accept / Reject
+               # if rand(Uniform(0, 1)) < exp(par_prop.logposterior-par.logposterior)
+
+               #      # Accept the proposed state-space parameters
+               #      # - Copy the fields of par_prop in par (in parallel)
+               #      begin
+               #           par_list = Array{Any}(undef, n_fields);
+
+               #           for i=1:n_iter
+
+               #                # Set end for the sync loop
+               #                end_sync_loop = n_workers;
+               #                if i*n_workers > n_fields
+               #                     end_sync_loop = n_fields-(i-1)*n_iter;
+               #                end
+
+               #                @sync for j=1:end_sync_loop
+
+               #                     ind_par = j+(i-1)*n_workers;
+
+               #                     # @async remotecall_fetch
+               #                     @async par_list[ind_par] =
+               #                          remotecall_fetch(copy, workers_vec[j], getfield(par_prop, j+(i-1)*n_workers));
+               #                end
+               #           end
+               #      end
+
+               #      par = ParSsm(par_list...);
+
+               #      # Copy θ_unb and θ_bound in parallel
+               #      @sync begin
+               #           @async θ_unb   = remotecall_fetch(copy, workers_vec[1], θ_prop_unb);
+               #           @async θ_bound = remotecall_fetch(copy, workers_vec[2], θ_prop_bound);
+               #      end
+               # end
           end
 
           # Chains

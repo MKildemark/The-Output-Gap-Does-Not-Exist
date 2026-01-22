@@ -4,10 +4,17 @@
 # Initial settings
 # ----------------------------------------------------------------------------------------------------------------------
 # choose model
-model = "okun_kuttner_AR1_6_obs" # "kuttner_AR2_3_obs", "kuttner_AR2_4_obs", "okun_kuttner_AR2_4_obs",  "okun_kuttner_AR2_6_obs",  "two_gap_AR1_6_obs", "two_gap_AR2_6_obs", "two_gap_AR1_4_obs"
+model = "rational_long_noise" # "rational_short", "rational_long", "kuttner_AR2_4_obs", "okun_kuttner_AR2_6_obs", "two_gap_AR2_6_obs"
 
 using Distributed;
-using Base.Threads;
+# using LinearAlgebra;
+# BLAS.set_num_threads(1)
+
+# using Base.Threads
+# @show pwd()
+# @show procs() workers() nprocs() nworkers()
+# @show Threads.nthreads() BLAS.get_num_threads()
+
 include("code/read_data.jl");
 include("code/tc_models/tc_$(model).jl");
 
@@ -35,12 +42,13 @@ end_presample_vec = [31, 12, 1998]; # End presample, day/month/year [it is used 
 h = 8; # forecast horizon [it is used when run_type is 1 or 3]
 
 
+
 # ----------------------------------------------------------------------------------------------------------------------
 # Metropolis-Within-Gibbs settings
 # ----------------------------------------------------------------------------------------------------------------------
 
-nDraws    = [40000; 40000]; # [number of draws in initialization; number of draws in execusion]
-burnin    = nDraws .- 20000; # number of draws in the burn-in stage
+nDraws    = [50000; 50000]; # [number of draws in initialization; number of draws in execusion]
+burnin    = nDraws .- 25000; # number of draws in the burn-in stage
 mwg_const = [0.025; 0.25]; # Initial constant. mwg_const might be adjusted to get an acceptance rate between 25% and 35%
 
 
