@@ -40,7 +40,7 @@ function set_par!(θ_bound, θ_unb, par, opt_transf, MIN, MAX, par_ind, par_size
      #     par.logprior += prior_opt.ϕ
      #     iend += par_size.ϕ
      # end
-     β = 0.99 #discount factor
+     β = 1.0 #discount factor
  
      # -------------------- Z (unrestricted loadings) --------------------
      if par_size.Z > 0
