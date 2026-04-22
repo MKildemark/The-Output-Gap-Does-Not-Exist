@@ -58,16 +58,11 @@ function tc_mwg(y, h, nDraws, burnin, mwg_const, σʸ)
      # Indeces for transition equations
      c_ind = c .!= 0;  # estimate drifts of gdp and employment trends
      T_ind = zeros(size(T)) .== 1;  #  λ_ind and ρ_ind below
-     # T_ind[1,3] = true   # χ on cost push to eff gap
 
      Q_ind = Q .== 1; # estiamte variances of shocks to cycles and trends. C and C+ have same variance
     
      Q_cov_ind = zeros(size(Q)) .!= 0;
      Q_cov_ind[1,3] = true; # estimate the covariance between shocks to Ψe (state 1) and Ψπ (state 3)
-
-     H_ind = zeros(size(H)) .!= 0; 
-     # H_ind[1,3] = true; # cost push shock can have contemporaneous effect on efficient gap cycle
-     
 
 
      # Initial conditions for the non-stationary states
@@ -92,8 +87,8 @@ function tc_mwg(y, h, nDraws, burnin, mwg_const, σʸ)
      # Metropolis-Within-Gibbs
      # -----------------------------------------------------------------------------------------------------------------
 
-     par_ind = BoolParSsm(d_ind, Z_ind, Z_plus_ind, Z_minus_ind, R_ind, c_ind, T_ind, Q_ind, Q_cov_ind, H_ind, λ_ind, ρ_ind);
-     par     = ParSsm(permutedims(y), d, Z, R, c, T, Q, H, α¹, P¹, P̄¹, λ, ρ, 0.0, 0.0, 0.0);
+     par_ind = BoolParSsm(d_ind, Z_ind, Z_plus_ind, Z_minus_ind, R_ind, c_ind, T_ind, Q_ind, Q_cov_ind, λ_ind, ρ_ind);
+     par     = ParSsm(permutedims(y), d, Z, R, c, T, Q, α¹, P¹, P̄¹, λ, ρ, 0.0, 0.0, 0.0);
 
      distr_α, distr_fcst, chain_θ_unb, chain_θ_bound, mwg_const, acc_rate, par, par_size, distr_par =
           mwg_main(par, h, nDraws, burnin, mwg_const, par_ind, σʸ);

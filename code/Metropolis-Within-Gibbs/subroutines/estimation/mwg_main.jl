@@ -44,13 +44,12 @@ function mwg_main(par::ParSsm, h::Int64, nDraws::Array{Int64, 1}, burnin::Array{
                                  sum(sum(par_ind.T)),
                                  sum(sum(par_ind.Q)),
                                  sum(sum(par_ind.Q_cov)), 
-                                 sum(sum(par_ind.H)),
                                  sum(sum(par_ind.λ)),
                                  sum(sum(par_ind.ρ)),
                                  sum(par_ind.d) + sum(sum(par_ind.Z)) + sum(sum(par_ind.Z_plus)) +
                                     sum(sum(par_ind.Z_minus)) + sum(sum(par_ind.R)) +
                                     sum(par_ind.c) + sum(sum(par_ind.T)) + sum(sum(par_ind.Q)) +
-                                    sum(sum(par_ind.Q_cov)) + sum(sum(par_ind.H)) + sum(sum(par_ind.λ)) + sum(sum(par_ind.ρ)));
+                                    sum(sum(par_ind.Q_cov)) + sum(sum(par_ind.λ)) + sum(sum(par_ind.ρ)));
 
 
      # -----------------------------------------------------------------------------------------------------------------
@@ -71,7 +70,7 @@ function mwg_main(par::ParSsm, h::Int64, nDraws::Array{Int64, 1}, burnin::Array{
      MAX_coeff_plus  = Inf;
      MAX_coeff_minus = 0;
      MAX_λ           = pi;
-     MAX_ρ           = 0.99;
+     MAX_ρ           = 0.97;
      MAX_corr      = 0.0;
      
 
@@ -82,9 +81,7 @@ function mwg_main(par::ParSsm, h::Int64, nDraws::Array{Int64, 1}, burnin::Array{
             MIN_coeff_minus*ones(par_size.Z_minus);
             MIN_var*ones(par_size.Q);
             MIN_corr*ones(par_size.Q_cov);
-            MIN_coeff*ones(par_size.H);
-            MIN_coeff*ones(par_size.c);
-            MIN_ρ*ones(par_size.T);
+            MIN_coeff*ones(par_size.c + par_size.T);
             MIN_λ*ones(par_size.λ);
             MIN_ρ*ones(par_size.ρ)];
 
@@ -95,9 +92,7 @@ function mwg_main(par::ParSsm, h::Int64, nDraws::Array{Int64, 1}, burnin::Array{
             MAX_coeff_minus*ones(par_size.Z_minus);
             MAX_var*ones(par_size.Q);
             MAX_corr*ones(par_size.Q_cov);
-            MAX_coeff*ones(par_size.H);
-            MAX_coeff*ones(par_size.c);
-            MAX_ρ*ones(par_size.T);
+            MAX_coeff*ones(par_size.c + par_size.T);
             MAX_λ*ones(par_size.λ);
             MAX_ρ*ones(par_size.ρ)];
 
@@ -110,8 +105,7 @@ function mwg_main(par::ParSsm, h::Int64, nDraws::Array{Int64, 1}, burnin::Array{
      prior_opt = PriorOpt(Normal(0, 1/xi),
                           Truncated(Normal(0, 1/xi), MIN_coeff_plus, MAX_coeff_plus),
                           Truncated(Normal(0, 1/xi), MIN_coeff_minus, MAX_coeff_minus),
-                          InverseGamma(3, 1),
-                          par_size.T*logpdf.(Uniform(MIN_ρ, MAX_ρ), MIN_ρ),
+                          InverseGamma(1e-8, 1e-8),
                           par_size.λ*logpdf.(Uniform(MIN_λ, MAX_λ), MIN_λ),
                           par_size.ρ*logpdf.(Uniform(MIN_ρ, MAX_ρ), MIN_ρ),
                           par_size.Q_cov*logpdf.(Uniform(MIN_corr, MAX_corr), MIN_corr));
@@ -123,9 +117,7 @@ function mwg_main(par::ParSsm, h::Int64, nDraws::Array{Int64, 1}, burnin::Array{
                                             0*ones(par_size.Z_minus);
                                             1*ones(par_size.Q);
                                             3*ones(par_size.Q_cov);
-                                            2*ones(par_size.H);
-                                            2*ones(par_size.c);
-                                            3*ones(par_size.T);
+                                            2*ones(par_size.c + par_size.T);
                                             3*ones(par_size.λ);
                                             3*ones(par_size.ρ)]);
 
@@ -141,9 +133,8 @@ function mwg_main(par::ParSsm, h::Int64, nDraws::Array{Int64, 1}, burnin::Array{
                     -ones(par_size.Z_minus);
                     ones(par_size.Q);
                     -0.5*ones(par_size.Q_cov);
-                    zeros(par_size.H);
                     zeros(par_size.c);
-                    0.5*ones(par_size.T);
+                    ones(par_size.T);
                     (2*pi/32)*ones(par_size.λ);
                     0.5*ones(par_size.ρ)];
 

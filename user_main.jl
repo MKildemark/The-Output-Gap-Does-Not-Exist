@@ -4,7 +4,7 @@
 # Initial settings
 # ----------------------------------------------------------------------------------------------------------------------
 # choose model
-model = "okun_kuttner_AR1_6_obs" # "kuttner_AR2_3_obs", "kuttner_AR2_4_obs", "okun_kuttner_AR2_4_obs",  "okun_kuttner_AR2_6_obs",  "two_gap_AR1_6_obs", "two_gap_AR2_6_obs", "two_gap_AR1_4_obs"
+model = "two_gap_AR2_6_obs" # "kuttner_AR2_3_obs", "kuttner_AR2_4_obs", "okun_kuttner_AR2_4_obs",  "okun_kuttner_AR2_6_obs",  "two_gap_AR1_6_obs", "two_gap_AR2_6_obs", "two_gap_AR1_4_obs"
 
 using Distributed;
 using Base.Threads;
@@ -39,8 +39,8 @@ h = 8; # forecast horizon [it is used when run_type is 1 or 3]
 # Metropolis-Within-Gibbs settings
 # ----------------------------------------------------------------------------------------------------------------------
 
-nDraws    = [40000; 40000]; # [number of draws in initialization; number of draws in execusion]
-burnin    = nDraws .- 20000; # number of draws in the burn-in stage
+nDraws    = [40_000; 40_000]; # [number of draws in initialization; number of draws in execusion]
+burnin    = nDraws .- 20_000; # number of draws in the burn-in stage
 mwg_const = [0.025; 0.25]; # Initial constant. mwg_const might be adjusted to get an acceptance rate between 25% and 35%
 
 
