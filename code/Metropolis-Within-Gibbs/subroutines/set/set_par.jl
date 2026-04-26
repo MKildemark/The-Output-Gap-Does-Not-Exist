@@ -145,24 +145,26 @@ function set_par!(θ_bound, θ_unb, par, opt_transf, MIN, MAX, par_ind, par_size
           end
 
           if par_size.Z > 0
-               par.Z[par_ind.Z .== true] = θ_bound[iend+1:iend+par_size.Z];
+               θ_Z = θ_bound[iend+1:iend+par_size.Z];
+               par.Z[par_ind.Z .== true] = θ_Z;
                if is_two_gap_baseline_model(par_ind, par_size, par)
                     rewrite_two_gap_baseline_common_block!(par, σʸ)
                elseif is_two_gap_lag_model(par_ind, par_size, par)
                     rewrite_two_gap_lag_common_block!(par, σʸ)
                end
-               par.logprior              = par.logprior + sum(logpdf.(prior_opt.N, par.Z[par_ind.Z .== true]));
+               par.logprior              = par.logprior + sum(logpdf.(prior_opt.N, θ_Z));
                iend                      = iend+par_size.Z;
           end
 
           if par_size.Z_plus > 0
-               par.Z[par_ind.Z_plus .== true] = θ_bound[iend+1:iend+par_size.Z_plus];
+               θ_Z_plus = θ_bound[iend+1:iend+par_size.Z_plus];
+               par.Z[par_ind.Z_plus .== true] = θ_Z_plus;
                if is_two_gap_baseline_model(par_ind, par_size, par)
                     rewrite_two_gap_baseline_common_block!(par, σʸ)
                elseif is_two_gap_lag_model(par_ind, par_size, par)
                     rewrite_two_gap_lag_common_block!(par, σʸ)
                end
-               par.logprior = par.logprior + sum(logpdf.(prior_opt.N_plus, par.Z[par_ind.Z_plus .== true]));
+               par.logprior = par.logprior + sum(logpdf.(prior_opt.N_plus, θ_Z_plus));
                iend         = iend+par_size.Z_plus;
           end
 

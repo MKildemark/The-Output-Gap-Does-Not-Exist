@@ -3,7 +3,7 @@ This file is part of the replication code for: Hasenzagl, T., Pellegrino, F., Re
 Please cite the paper if you are using any part of the code for academic work (including, but not limited to, conference and peer-reviewed papers).
 =#
 
-function tc_mwg(y, h, nDraws, burnin, mwg_const, σʸ)
+function tc_mwg(y, h, nDraws, burnin, mwg_const, σʸ; acc_target=0.25, adapt_interval=50)
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Original Hasenzagl-Pellegrino-Reichlin-Ricco inflation model.
@@ -108,7 +108,7 @@ function tc_mwg(y, h, nDraws, burnin, mwg_const, σʸ)
      par     = ParSsm(permutedims(y), d, Z, R, c, T, Q, α¹, P¹, P̄¹, λ, ρ, 0.0, 0.0, 0.0);
 
      distr_α, distr_fcst, chain_θ_unb, chain_θ_bound, mwg_const, acc_rate, par, par_size, distr_par =
-          mwg_main(par, h, nDraws, burnin, mwg_const, par_ind, σʸ);
+          mwg_main(par, h, nDraws, burnin, mwg_const, par_ind, σʸ; acc_target=acc_target, adapt_interval=adapt_interval);
 
      return distr_α, distr_fcst, chain_θ_unb, chain_θ_bound, mwg_const, acc_rate, par, par_ind, par_size, distr_par;
 end

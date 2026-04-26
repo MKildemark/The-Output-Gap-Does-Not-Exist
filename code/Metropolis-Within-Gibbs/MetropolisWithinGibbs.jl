@@ -85,7 +85,15 @@ module MetropolisWithinGibbs
 	end
 
 	import Base.copy
-	Base.copy(x::T) where T = T([getfield(x, k) for k ∈ fieldnames(T)]...)
+	Base.copy(x::ParSsm) = ParSsm(copy(x.y), copy(x.d), copy(x.Z), copy(x.R), copy(x.c),
+	                              copy(x.T), copy(x.Q), copy(x.α¹), copy(x.P¹), copy(x.P̄¹),
+	                              copy(x.λ), copy(x.ρ), x.logprior, x.loglik, x.logposterior)
+	Base.copy(x::SizeParSsm) = SizeParSsm(x.d, x.Z, x.Z_plus, x.Z_minus, x.R, x.c, x.T, x.Q,
+	                                      x.Q_cov, x.λ, x.ρ, x.θ)
+	Base.copy(x::BoolParSsm) = BoolParSsm(copy(x.d), copy(x.Z), copy(x.Z_plus), copy(x.Z_minus),
+	                                      copy(x.R), copy(x.c), copy(x.T), copy(x.Q),
+	                                      copy(x.Q_cov), copy(x.λ), copy(x.ρ))
+	Base.copy(x::PriorOpt) = PriorOpt(x.N, x.N_plus, x.N_minus, x.IG, x.λ, x.ρ, x.corr)
 
 	# -----------------------------------------------------------------------------------------------------------------
 	# Subroutines
@@ -117,5 +125,5 @@ module MetropolisWithinGibbs
 	# Export functions
 	# -----------------------------------------------------------------------------------------------------------------
 
-	export kalman_diffuse!, mwg_main, ex_blkdiag, ex_inv, ex_ismember, set_par_fast!, ParSsm, SizeParSsm, BoolParSsm, PriorOpt;
+	export kalman_diffuse!, mwg_main, ex_blkdiag, ex_inv, ex_ismember, set_par!, ParSsm, SizeParSsm, BoolParSsm, PriorOpt;
 end

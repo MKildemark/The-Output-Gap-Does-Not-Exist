@@ -1,5 +1,5 @@
 
-function tc_mwg(y, h, nDraws, burnin, mwg_const, σʸ)
+function tc_mwg(y, h, nDraws, burnin, mwg_const, σʸ; acc_target=0.25, adapt_interval=50)
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Baseline empirical two-gap model used in the paper's US application.
@@ -107,7 +107,7 @@ function tc_mwg(y, h, nDraws, burnin, mwg_const, σʸ)
      par     = ParSsm(permutedims(y), d, Z, R, c, T, Q, α¹, P¹, P̄¹, λ, ρ, 0.0, 0.0, 0.0);
 
      distr_α, distr_fcst, chain_θ_unb, chain_θ_bound, mwg_const, acc_rate, par, par_size, distr_par =
-          mwg_main(par, h, nDraws, burnin, mwg_const, par_ind, σʸ);
+          mwg_main(par, h, nDraws, burnin, mwg_const, par_ind, σʸ; acc_target=acc_target, adapt_interval=adapt_interval);
 
      return distr_α, distr_fcst, chain_θ_unb, chain_θ_bound, mwg_const, acc_rate, par, par_ind, par_size, distr_par;
 end

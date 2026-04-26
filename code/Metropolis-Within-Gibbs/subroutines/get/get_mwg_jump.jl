@@ -10,11 +10,11 @@ function get_mwg_jump(Σ::Array{Float64, 2}, mwg_const::Float64, nDraws_worker::
 # ----------------------------------------------------------------------------------------------------------------------
 
      len_Σ              = size(Σ)[1];
-     jumps_obj          = MvNormal(zeros(len_Σ), (mwg_const^2)*Σ);
+     L                  = proposal_cholesky(Σ);
      θ_unb_jumps_worker = zeros(len_Σ, nDraws_worker);
 
      for draw=1:nDraws_worker
-          θ_unb_jumps_worker[:, draw] = rand(jumps_obj);
+          θ_unb_jumps_worker[:, draw] = mwg_const .* (L * randn(len_Σ));
      end
 
      return θ_unb_jumps_worker;

@@ -4,10 +4,9 @@
 # Initial settings
 # ----------------------------------------------------------------------------------------------------------------------
 # choose model
-model = "two_gap_AR2_6_obs" # "hasenzagl_2020", "kuttner_AR2_4_obs", "okun_kuttner_AR2_6_obs",  "two_gap_AR2_6_obs"
+model = "two_gap_AR2_6_obs" # "two_gap_AR2_6_obs", "two_gap_AR2_6_obs_lags", "kuttner_AR2_4_obs", "okun_kuttner_AR2_6_obs", "hasenzagl_2020"
 
 using Distributed;
-using Base.Threads;
 include("code/read_data.jl");
 include("code/tc_models/tc_$(model).jl");
 
@@ -30,18 +29,26 @@ elseif run_type == 3
 end
 res_name_iis = "$(model)_iis";
 
-data_path = "./data/inflation_2025.xlsx"; # Data file
-end_presample_vec = [31, 12, 1998]; # End presample, day/month/year [it is used when run_type is 2 or 3]
-h = 8; # forecast horizon [it is used when run_type is 1 or 3]
+data_path = "./data/inflation_2025.xlsx";
+end_presample_vec = [31, 12, 1998];
+h = 8;
 
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Metropolis-Within-Gibbs settings
 # ----------------------------------------------------------------------------------------------------------------------
 
-nDraws    = [40_000; 40_000]; # [number of draws in initialization; number of draws in execusion]
-burnin    = nDraws .- 20_000; # number of draws in the burn-in stage
-mwg_const = [0.025; 0.25]; # Initial constant. mwg_const might be adjusted to get an acceptance rate between 25% and 35%
+iter_init_adapt = 10000;
+iter_init_store = 10000;
+iter_main_adapt = 10000;
+iter_main_store = 10000;
+mwg_const       = [0.25; 0.25];
+acc_target      = 0.25;
+adapt_interval  = 100;
+
+
+nDraws = [iter_init_adapt + iter_init_store; iter_main_adapt + iter_main_store];
+burnin = [iter_init_adapt; iter_main_adapt];
 
 
 
@@ -64,4 +71,4 @@ include("code/tc_main.jl");
 
 display("Done!");
 
- 
+

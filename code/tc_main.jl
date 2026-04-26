@@ -47,7 +47,7 @@ end
 
 Single iteration: it executes the code using the most updated datapoints.
 """
-function tc_iis_run(data::Matrix{Union{Float64, Missing}}, date::Vector{Date}, nM::Int64, nQ::Int64, MNEMONIC::Vector{String}, h::Int64, nDraws::Vector{Int64}, burnin::Vector{Int64}, mwg_const::Vector{Float64}, res_name::String)
+function tc_iis_run(data::Matrix{Union{Float64, Missing}}, date::Vector{Date}, nM::Int64, nQ::Int64, MNEMONIC::Vector{String}, h::Int64, nDraws::Vector{Int64}, burnin::Vector{Int64}, mwg_const::Vector{Float64}, res_name::String, acc_target::Float64, adapt_interval::Int64)
 
     # ----- Prepare the data -----
 
@@ -57,13 +57,14 @@ function tc_iis_run(data::Matrix{Union{Float64, Missing}}, date::Vector{Date}, n
     # ----- Run the Metropolis-Within-Gibbs -----
 
     distr_α, distr_fcst, chain_θ_unb, chain_θ_bound, mwg_const, acc_rate, par, par_ind, par_size, distr_par =
-         tc_mwg(data, h, nDraws, burnin, mwg_const, σʸ);
+         tc_mwg(data, h, nDraws, burnin, mwg_const, σʸ; acc_target=acc_target, adapt_interval=adapt_interval);
 
     # Save res in jld2 format
     save(string("./res_", res_name, ".jld2"), Dict("distr_α" => distr_α, "distr_fcst" => distr_fcst, "chain_θ_unb" => chain_θ_unb,
                 "chain_θ_bound" => chain_θ_bound, "mwg_const" => mwg_const, "acc_rate" => acc_rate, "par" => par,
                 "nDraws" => nDraws, "burnin" => burnin, "data" => data, "date" => date, "nM" => nM, "nQ" => nQ,
-                "MNEMONIC" => MNEMONIC, "par_ind" => par_ind, "par_size" => par_size, "distr_par" => distr_par, "σʸ" => σʸ));
+                "MNEMONIC" => MNEMONIC, "par_ind" => par_ind, "par_size" => par_size, "distr_par" => distr_par,
+                "acc_target" => acc_target, "adapt_interval" => adapt_interval, "σʸ" => σʸ));
 end
 
 """
@@ -111,13 +112,14 @@ function tc_cond_fc_run(data::Matrix{Union{Float64, Missing}}, date::Vector{Date
         # Pre-allocate memory
         k               = size(distr_par[1].T)[1];
         m, n            = size(data_ith);
-        distr_fcst_cond = zeros(m, n, nDraws[2]-burnin[2]);
-        distr_α_cond    = zeros(k, m, nDraws[2]-burnin[2]);
+        n_draws_final   = length(distr_par);
+        distr_fcst_cond = zeros(m, n, n_draws_final);
+        distr_α_cond    = zeros(k, m, n_draws_final);
 
         # Run the conditional forecast
-        for draw=1:nDraws[2]-burnin[2]
+        for draw=1:n_draws_final
             if draw > 1 && mod(draw, 100) == 0
-                print("Conditional forecast $i (out of $(size(cond)[1])) > $draw-th iteration (out of $(nDraws[2]-burnin[2])) \n");
+                print("Conditional forecast $i (out of $(size(cond)[1])) > $draw-th iteration (out of $n_draws_final) \n");
             end
 
             # Draw
@@ -143,7 +145,7 @@ end
 
 Out-of-sample: out-of-sample exercise, forecasting period starts after end_presample_vec.
 """
-function tc_oos_run(data::Matrix{Union{Float64, Missing}}, date::Vector{Date}, nM::Int64, nQ::Int64, MNEMONIC::Vector{String}, h::Int64, nDraws::Vector{Int64}, burnin::Vector{Int64}, mwg_const::Vector{Float64}, res_name::String, end_presample_vec::Vector{Int64})
+function tc_oos_run(data::Matrix{Union{Float64, Missing}}, date::Vector{Date}, nM::Int64, nQ::Int64, MNEMONIC::Vector{String}, h::Int64, nDraws::Vector{Int64}, burnin::Vector{Int64}, mwg_const::Vector{Float64}, res_name::String, end_presample_vec::Vector{Int64}, acc_target::Float64, adapt_interval::Int64)
 
     # ----- Initialise -----
 
@@ -172,10 +174,10 @@ function tc_oos_run(data::Matrix{Union{Float64, Missing}}, date::Vector{Date}, n
         # Run the Metropolis-Within-Gibbs
         global mwg_const;
         distr_α, distr_fcst, chain_θ_unb, chain_θ_bound, mwg_const, acc_rate, par, par_ind, par_size, distr_par =
-             tc_mwg(data_t, h, nDraws, burnin, mwg_const, σʸ);
+             tc_mwg(data_t, h, nDraws, burnin, mwg_const, σʸ; acc_target=acc_target, adapt_interval=adapt_interval);
 
         # Re-attribute standard deviation of the delta to the forecasts
-        for draw=1:nDraws[2]-burnin[2]
+        for draw=1:size(distr_fcst, 3)
             distr_fcst[:, :, draw] = distr_fcst[:, :, draw] .* σʸ;
         end
 
@@ -183,13 +185,15 @@ function tc_oos_run(data::Matrix{Union{Float64, Missing}}, date::Vector{Date}, n
         save(string("./res_", res_name, "_chunk", t-end_presample+1, ".jld2"), Dict("distr_α" => distr_α, "distr_fcst" => distr_fcst,
                     "chain_θ_unb" => chain_θ_unb, "chain_θ_bound" => chain_θ_bound, "mwg_const" => mwg_const,
                     "acc_rate" => acc_rate, "par" => par, "par_ind" => par_ind, "par_size" => par_size,
-                    "distr_par" => distr_par, "data" => data_t, "σʸ" => σʸ));
+                    "distr_par" => distr_par, "acc_target" => acc_target, "adapt_interval" => adapt_interval,
+                    "data" => data_t, "σʸ" => σʸ));
     end
 
     # Save res in jld2 format
     save(string("./res_", res_name, "_chunk0.jld2"), Dict("end_presample" => end_presample, "end_oos" => end_oos,
                 "oos_length" => oos_length, "nDraws" => nDraws, "burnin" => burnin, "date" => date,
-                "nM" => nM, "nQ" => nQ, "MNEMONIC" => MNEMONIC, "data_full" => data_full));
+                "nM" => nM, "nQ" => nQ, "MNEMONIC" => MNEMONIC, "data_full" => data_full,
+                "acc_target" => acc_target, "adapt_interval" => adapt_interval));
 end
 
 
@@ -201,7 +205,7 @@ Execution manager
 
 # Single iteration: it executes the code using the most updated datapoints
 if run_type == 1
-    tc_iis_run(data, date, nM, nQ, MNEMONIC, h, nDraws, burnin, mwg_const, res_name);
+    tc_iis_run(data, date, nM, nQ, MNEMONIC, h, nDraws, burnin, mwg_const, res_name, acc_target, adapt_interval);
 
 # Conditional forecasts
 elseif run_type == 2
@@ -209,5 +213,5 @@ elseif run_type == 2
 
 # Out-of-sample: out-of-sample exercise, forecasting period starts after end_presample_vec
 elseif run_type == 3
-    tc_oos_run(data, date, nM, nQ, MNEMONIC, h, nDraws, burnin, mwg_const, res_name, end_presample_vec);
+    tc_oos_run(data, date, nM, nQ, MNEMONIC, h, nDraws, burnin, mwg_const, res_name, end_presample_vec, acc_target, adapt_interval);
 end
