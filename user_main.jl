@@ -4,7 +4,7 @@
 # Initial settings
 # ----------------------------------------------------------------------------------------------------------------------
 # choose model
-model = "two_gap_AR2_6_obs" # "two_gap_AR2_6_obs", "two_gap_AR2_6_obs_lags", "kuttner_AR2_4_obs", "okun_kuttner_AR2_6_obs", "hasenzagl_2020"
+model = "hasenzagl_2020" # "two_gap_AR2_6_obs", "two_gap_AR2_6_obs_lags", "kuttner_AR2_4_obs", "okun_kuttner_AR2_6_obs", "hasenzagl_2020"
 
 using Distributed;
 include("code/read_data.jl");
