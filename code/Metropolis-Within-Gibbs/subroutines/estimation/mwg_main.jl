@@ -22,7 +22,7 @@ function mwg_main(par::ParSsm, h::Int64, nDraws::Array{Int64, 1}, burnin::Array{
           end
      end
 
-     
+
      # -----------------------------------------------------------------------------------------------------------------
      # Initialise
      # -----------------------------------------------------------------------------------------------------------------
@@ -43,7 +43,7 @@ function mwg_main(par::ParSsm, h::Int64, nDraws::Array{Int64, 1}, burnin::Array{
                                  sum(par_ind.c),
                                  sum(sum(par_ind.T)),
                                  sum(sum(par_ind.Q)),
-                                 sum(sum(par_ind.Q_cov)), 
+                                 sum(sum(par_ind.Q_cov)),
                                  sum(sum(par_ind.λ)),
                                  sum(sum(par_ind.ρ)),
                                  sum(par_ind.d) + sum(sum(par_ind.Z)) + sum(sum(par_ind.Z_plus)) +
@@ -64,15 +64,14 @@ function mwg_main(par::ParSsm, h::Int64, nDraws::Array{Int64, 1}, burnin::Array{
      MIN_coeff_minus = -Inf;
      MIN_λ           = xi;
      MIN_ρ           = xi;
-     MIN_corr      = -0.99;
+     MIN_corr        = -0.99;
      MAX_var         = Inf;
      MAX_coeff       = Inf;
      MAX_coeff_plus  = Inf;
      MAX_coeff_minus = 0;
      MAX_λ           = pi;
      MAX_ρ           = 0.97;
-     MAX_corr      = 0.0;
-     
+     MAX_corr        = 0.0;
 
      # MIN
      MIN = [MIN_var*ones(par_size.R);
@@ -105,7 +104,7 @@ function mwg_main(par::ParSsm, h::Int64, nDraws::Array{Int64, 1}, burnin::Array{
      prior_opt = PriorOpt(Normal(0, 1/xi),
                           Truncated(Normal(0, 1/xi), MIN_coeff_plus, MAX_coeff_plus),
                           Truncated(Normal(0, 1/xi), MIN_coeff_minus, MAX_coeff_minus),
-                          InverseGamma(1e-8, 1e-8),
+                          InverseGamma(3, 1),
                           par_size.λ*logpdf.(Uniform(MIN_λ, MAX_λ), MIN_λ),
                           par_size.ρ*logpdf.(Uniform(MIN_ρ, MAX_ρ), MIN_ρ),
                           par_size.Q_cov*logpdf.(Uniform(MIN_corr, MAX_corr), MIN_corr));
@@ -131,7 +130,7 @@ function mwg_main(par::ParSsm, h::Int64, nDraws::Array{Int64, 1}, burnin::Array{
                     zeros(par_size.d);
                     ones(par_size.Z + par_size.Z_plus);
                     -ones(par_size.Z_minus);
-                    ones(par_size.Q);
+                    0.25*ones(par_size.Q);
                     -0.5*ones(par_size.Q_cov);
                     zeros(par_size.c);
                     ones(par_size.T);
@@ -182,7 +181,7 @@ function mwg_main(par::ParSsm, h::Int64, nDraws::Array{Int64, 1}, burnin::Array{
 
           chain_θ_unb, chain_θ_bound, distr_α, distr_fcst, par, distr_par =
                mwg_run(θ_start_unb, par, h, par_ind, par_size, prior_opt, MIN, MAX, opt_transf, nDraws[2], burnin[2],
-                    mwg_const[2], algorithm_name, t, end_oos, Σ_mwg, σʸ, 0);
+                    mwg_const[2], algorithm_name, t, end_oos, Σ_mwg, σʸ, 1);
 
           acc_rate = get_progress(chain_θ_unb, burnin[2]+1, nDraws[2], 0);
 
@@ -191,12 +190,6 @@ function mwg_main(par::ParSsm, h::Int64, nDraws::Array{Int64, 1}, burnin::Array{
                mwg_const[2] = mwg_const[2]*exp(delta_acc/100);
           end
      end
-     display("starting last run :)")
-      chain_θ_unb, chain_θ_bound, distr_α, distr_fcst, par, distr_par =
-               mwg_run(θ_start_unb, par, h, par_ind, par_size, prior_opt, MIN, MAX, opt_transf, nDraws[2], burnin[2],
-                    mwg_const[2], algorithm_name, t, end_oos, Σ_mwg, σʸ, 1);
-
-          acc_rate = get_progress(chain_θ_unb, burnin[2]+1, nDraws[2], "Final acceptance rate");
 
      return distr_α, distr_fcst, chain_θ_unb, chain_θ_bound, mwg_const, acc_rate, par, par_size, distr_par;
 end

@@ -2,7 +2,24 @@
 function tc_mwg(y, h, nDraws, burnin, mwg_const, σʸ)
 
 # ----------------------------------------------------------------------------------------------------------------------
-# Define the basic structure of the state-space parameters
+# Alternative 6-observable two-gap specification with extra lagged common loadings.
+#
+# Observables are ordered as:
+#   1. GDP
+#   2. Employment
+#   3. Unemployment
+#   4. CPI inflation
+#   5. UoM 1Y inflation expectations
+#   6. SPF 1Y inflation expectations
+#
+# The state ordering matches the baseline empirical two-gap model:
+#   1:2 -> efficient cycle (c_t^TG, c_t^{TG*})
+#   3:4 -> cost-push cycle (u_t^TG, u_t^{TG*})
+#   5   -> inflation trend (mu_t^pi)
+#
+# Relative to tc_two_gap_AR2_6_obs.jl, this variant allows additional lagged
+# common-state terms in the measurement block. It is an exploratory extension,
+# not the baseline specification described in the paper text.
 # ----------------------------------------------------------------------------------------------------------------------
 
      n = size(y)[2];
@@ -13,26 +30,26 @@ function tc_mwg(y, h, nDraws, burnin, mwg_const, σʸ)
      # -----------------------------------------------------------------------------------------------------------------
 
      d   = zeros(n);  # no intercepts
-     Z   = [ones(n) [0; ones(5)] [zeros(3); ones(3)] [zeros(3); ones(3)] [zeros(3); ones(3)]]; # the common factors in z
-     Z1a = kron(Matrix(I, 3, 3), [1, 0, 1])';         # Idiosyncratic parts of y, e, u   (cycle plus trend)           # idio C, idio C+, idio trend
-     Z1b = kron(Matrix(I, 2, 2), [1, 0, 1])';         # Idiosyncratic parts of inflation expectations (cycle plus trend)     # idio C, idio C+, idio trend
-     Z2  = kron(Matrix(I, 1, 1), [1, 0])';            # idiosyncratic parts of infaltion (only idiosyncratic cycle)          # idio C, idio C+
+     Z   = [ones(n) [0; ones(5)] [zeros(3); ones(3)] [zeros(3); ones(3)] [zeros(3); ones(3)]]; # placeholder common block with extra lag terms
+     Z1a = kron(Matrix(I, 3, 3), [1, 0, 1])';         # GDP, employment, unemployment: idiosyncratic cycle + companion + trend
+     Z1b = kron(Matrix(I, 2, 2), [1, 0, 1])';         # UoM/SPF expectations: idiosyncratic cycle + companion + trend
+     Z2  = kron(Matrix(I, 1, 1), [1, 0])';            # Inflation: idiosyncratic cycle only
 
      Z  = [Z ex_blkdiag(Z1a, Z2, Z1b)];
      R  = zeros(n, n);         # no observation noise      # irregular components
 
-     # Indeces for observation equations  (where are parameters to be estimated)
+     # Indices for observation equations
      d_ind = d .!= 0;  # no intercepts to be estimated
      Z_ind = zeros(size(Z)) .!= 0;
      R_ind = R .!= 0;  # no observation noise to be estimated
 
-     # Projections
-     Z_ind[[2,3], [1,2]] .= true; #  
-     Z_ind[[4,5],[2,4]]     .= true; #
+     # Free common-state loadings for the lagged-measurement variant.
+     Z_ind[[2,3], [1,2]] .= true;
+     Z_ind[[4,5],[2,4]] .= true;
    
      Z_plus_ind = zeros(size(Z)) .!= 0;
-     Z_plus_ind[[4,5],[1]] .= true; # 
-     Z_plus_ind[5,3] = true; #
+     Z_plus_ind[[4,5],[1]] .= true;
+     Z_plus_ind[5,3] = true;
      Z_minus_ind = zeros(size(Z)) .!= 0;
 
 
@@ -41,28 +58,28 @@ function tc_mwg(y, h, nDraws, burnin, mwg_const, σʸ)
      # -----------------------------------------------------------------------------------------------------------------
 
      c              = zeros(size(Z)[2]);  #  constants in the transition equations (size = no. states)
-     ind_trends     = [8; 11]; # GDP trend and EMPL trend state indexes
-     c[ind_trends] .= 1;  # random walk drift for GDP and EMPL trends
+     ind_trends     = [8; 11]; # GDP and employment trends have drifts
+     c[ind_trends] .= 1;  # random-walk drifts for GDP and employment trends
 
      T_c     = convert(Array{Float64, 2}, [1 0; 0 0]);  # 2*2 transition block for cycle C and C+
      T_ct    = convert(Array{Float64, 2}, [1 0 0; 0 0 0; 0 0 1]); # 2*2 transition block for cycle C and C+ plus trend
      Q_c_ext = convert(Array{Float64, 2}, [1 0 0; 0 0 0; 0 0 0]);
 
-     T = cat(dims=[1,2], T_c, [T_ct for i=1:4]..., [T_c for i=1:1]..., [T_ct for i=1:2]...); # PC(cycle), EP(cycle+trend),y(cycle+trend), e(cycle+trend), u(cycle+trend), inf(cycle), inf^c(cycle), UoM(cycle+trend), SPF(cycle+trend)
+     T = cat(dims=[1,2], T_c, [T_ct for i=1:4]..., [T_c for i=1:1]..., [T_ct for i=1:2]...); # same state transition structure as the baseline two-gap model
      Q = cat(dims=[1,2], T_c, [T_ct for i=1:4]..., [T_c for i=1:1]..., [T_ct for i=1:2]...); 
 
 
      H = Matrix{Float64}(I, size(T,1), size(T,1))
 
 
-     # Indeces for transition equations
+     # Indices for transition equations
      c_ind = c .!= 0;  # estimate drifts of gdp and employment trends
-     T_ind = zeros(size(T)) .== 1;  #  λ_ind and ρ_ind below
+     T_ind = zeros(size(T)) .== 1;  # λ_ind and ρ_ind below
 
-     Q_ind = Q .== 1; # estiamte variances of shocks to cycles and trends. C and C+ have same variance
+     Q_ind = Q .== 1; # estimate shock variances for cycles and trends
     
      Q_cov_ind = zeros(size(Q)) .!= 0;
-     Q_cov_ind[1,3] = true; # estimate the covariance between shocks to Ψe (state 1) and Ψπ (state 3)
+     Q_cov_ind[1,3] = true; # estimate corr(xi^c_t, xi^u_t); set_par! converts it to covariance entries
 
 
      # Initial conditions for the non-stationary states
@@ -74,7 +91,7 @@ function tc_mwg(y, h, nDraws, burnin, mwg_const, σʸ)
      α¹ = zeros(size(c));
      P¹       = zeros(size(P̄¹));
 
-     # Trigonometric states (indicates where the 2*2 cycle blocks start in T and Q. Needed to fill T and Q in set_par)
+     # Trigonometric-cycle markers used by set_par! to rebuild each Harvey block
      λ_c   = convert(Array{Float64, 1}, [1; 0]);  
      λ_ct  = convert(Array{Float64, 1}, [1; 0; 0]);
      λ     = vcat([1; 0], [λ_ct for i=1:4]..., [λ_c for i=1:1]..., [λ_ct for i=1:2]...);

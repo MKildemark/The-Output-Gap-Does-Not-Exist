@@ -94,7 +94,7 @@ function mwg_run(θ_unb::Array{Float64,1}, par::ParSsm, h::Int64, par_ind::BoolP
                               # Set end for the sync loop
                               end_sync_loop = n_workers;
                               if i*n_workers > n_fields
-                                   end_sync_loop = n_fields-(i-1)*n_iter;
+                                   end_sync_loop = n_fields-(i-1)*n_workers;
                               end
 
                               @sync for j=1:end_sync_loop

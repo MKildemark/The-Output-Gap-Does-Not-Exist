@@ -4,7 +4,7 @@
 # Initial settings
 # ----------------------------------------------------------------------------------------------------------------------
 # choose model
-model = "two_gap_AR2_6_obs" # "kuttner_AR2_3_obs", "kuttner_AR2_4_obs", "okun_kuttner_AR2_4_obs",  "okun_kuttner_AR2_6_obs",  "two_gap_AR1_6_obs", "two_gap_AR2_6_obs", "two_gap_AR1_4_obs"
+model = "two_gap_AR2_6_obs" # "hasenzagl_2020", "kuttner_AR2_4_obs", "okun_kuttner_AR2_6_obs",  "two_gap_AR2_6_obs"
 
 using Distributed;
 using Base.Threads;

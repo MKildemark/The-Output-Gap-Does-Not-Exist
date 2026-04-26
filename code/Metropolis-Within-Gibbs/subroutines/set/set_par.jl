@@ -3,10 +3,118 @@ This file is part of the replication code for: Hasenzagl, T., Pellegrino, F., Re
 Please cite the paper if you are using any part of the code for academic work (including, but not limited to, conference and peer-reviewed papers).
 =#
 
+function is_two_gap_baseline_model(par_ind, par_size, par)
+     return size(par.Z, 1) == 6 &&
+            par_size.λ > 0 &&
+            par_size.Z == 2 &&
+            par_size.Z_plus == 3 &&
+            sum(par_ind.Z) == 2 &&
+            sum(par_ind.Z_plus) == 3 &&
+            par_ind.Z[2, 1] && par_ind.Z[3, 1] &&
+            par_ind.Z_plus[4, 1] && par_ind.Z_plus[5, 1] && par_ind.Z_plus[5, 3]
+end
+
+function is_two_gap_lag_model(par_ind, par_size, par)
+     return size(par.Z, 1) == 6 &&
+            par_size.λ > 0 &&
+            par_size.Z == 8 &&
+            par_size.Z_plus == 3 &&
+            sum(par_ind.Z) == 8 &&
+            sum(par_ind.Z_plus) == 3 &&
+            par_ind.Z[2, 1] && par_ind.Z[2, 2] &&
+            par_ind.Z[3, 1] && par_ind.Z[3, 2] &&
+            par_ind.Z[4, 2] && par_ind.Z[4, 4] &&
+            par_ind.Z[5, 2] && par_ind.Z[5, 4] &&
+            par_ind.Z_plus[4, 1] && par_ind.Z_plus[5, 1] && par_ind.Z_plus[5, 3]
+end
+
+function rewrite_two_gap_baseline_common_block!(par, σʸ)
+     common = Diagonal(vec(σʸ)) * copy(par.Z[1:6, 1:5])
+
+     δe = common[2, 1]
+     δu = common[3, 1]
+     κ  = common[4, 1]
+     δE = common[5, 1]
+     γE = common[5, 3]
+
+     common .= 0.0
+     common[1, 1] = 1.0
+     common[2, 1] = δe
+     common[3, 1] = δu
+     common[4, 1] = κ + δE
+     common[4, 3] = 1.0 + γE
+     common[4, 5] = 1.0
+     common[5, 1] = δE
+     common[5, 3] = γE
+     common[5, 5] = 1.0
+     common[6, 1] = δE
+     common[6, 3] = γE
+     common[6, 5] = 1.0
+
+     par.Z[1:6, 1:5] .= Diagonal(1.0 ./ vec(σʸ)) * common
+end
+
+function rewrite_two_gap_lag_common_block!(par, σʸ)
+     common = Diagonal(vec(σʸ)) * copy(par.Z[1:6, 1:5])
+
+     δe1 = common[2, 1]
+     δe2 = common[2, 2]
+     δu1 = common[3, 1]
+     δu2 = common[3, 2]
+
+     κ0   = common[4, 1]
+     κlag = common[4, 2]
+     υlag = common[4, 4]
+
+     δE0   = common[5, 1]
+     δElag = common[5, 2]
+     γE0   = common[5, 3]
+     γElag = common[5, 4]
+
+     common .= 0.0
+     common[1, 1] = 1.0
+
+     common[2, 1] = δe1
+     common[2, 2] = δe2
+     common[3, 1] = δu1
+     common[3, 2] = δu2
+
+     common[4, 1] = κ0 + δE0
+     common[4, 2] = κlag + δElag
+     common[4, 3] = 1.0 + γE0
+     common[4, 4] = υlag + γElag
+     common[4, 5] = 1.0
+
+     common[5, 1] = δE0
+     common[5, 2] = δElag
+     common[5, 3] = γE0
+     common[5, 4] = γElag
+     common[5, 5] = 1.0
+
+     common[6, 1] = δE0
+     common[6, 2] = δElag
+     common[6, 3] = γE0
+     common[6, 4] = γElag
+     common[6, 5] = 1.0
+
+     par.Z[1:6, 1:5] .= Diagonal(1.0 ./ vec(σʸ)) * common
+end
+
 function set_par!(θ_bound, θ_unb, par, opt_transf, MIN, MAX, par_ind, par_size, prior_opt, apriori_rejection, σʸ)
 
 # ----------------------------------------------------------------------------------------------------------------------
-# Update the parameters of the state-space model
+# Update the state-space object from the current parameter draw.
+#
+# Generic behavior:
+# - write the free entries selected by par_ind into d, Z, R, c, T, Q
+# - apply priors and transformation Jacobians
+# - rebuild Harvey-cycle transition blocks from λ and ρ
+#
+# Local repository extensions relative to the original Hasenzagl code:
+# - Q_cov stores free correlation parameters for selected shock pairs
+# - the local 6-observable empirical two-gap models reserve the first five
+#   columns of Z for the common-state block and impose their NK-style loading
+#   restrictions here after the free coefficients have been inserted
 # ----------------------------------------------------------------------------------------------------------------------
 
 
@@ -37,50 +145,33 @@ function set_par!(θ_bound, θ_unb, par, opt_transf, MIN, MAX, par_ind, par_size
           end
 
           if par_size.Z > 0
-                par.Z[par_ind.Z .== true] = θ_bound[iend+1:iend+par_size.Z];
-          
-                if size(par.Z)[1] == 6 && par_size.λ > 0  # two gap with AR(2) 6 obs
-                    #rescale
-                    par.Z[1:6, 1:5] .= Diagonal(vec(σʸ)) * par.Z[1:6, 1:5]
-                    # set ones
-                    par.Z[1,1] = 1.0     # y loads 1 on μ^e
-                    par.Z[4:6, 5] .= 1.0     # π, UoM, SPF load 1 on μ^π 
-                    par.Z[4,3] = 1.0  
-                    # fill parameters
-                    par.Z[6,1:4] = copy(par.Z[5,1:4]); # common loading on both Eπ
-                    par.Z[4,1:4] = par.Z[4,1:4].+par.Z[5,1:4]; 
-                    # scale with 1/σʸ
-                    par.Z[1:6, 1:5] .= Diagonal(1.0 ./ vec(σʸ)) * par.Z[1:6, 1:5]  # scale the common loadings with 1/σʸ to get common states in true scale
+               par.Z[par_ind.Z .== true] = θ_bound[iend+1:iend+par_size.Z];
+               if is_two_gap_baseline_model(par_ind, par_size, par)
+                    rewrite_two_gap_baseline_common_block!(par, σʸ)
+               elseif is_two_gap_lag_model(par_ind, par_size, par)
+                    rewrite_two_gap_lag_common_block!(par, σʸ)
                end
                par.logprior              = par.logprior + sum(logpdf.(prior_opt.N, par.Z[par_ind.Z .== true]));
                iend                      = iend+par_size.Z;
           end
 
-          if par_size.Z_plus > 0 
+          if par_size.Z_plus > 0
                par.Z[par_ind.Z_plus .== true] = θ_bound[iend+1:iend+par_size.Z_plus];
-               if size(par.Z)[1] == 6 && par_size.λ > 0  # two gap with AR(2) 6 obs
-                       # rescale
-                       par.Z[1:6, 1:5] .= Diagonal(vec(σʸ)) * par.Z[1:6, 1:5]
-                       # set ones
-                       par.Z[1,1] = 1.0     # y loads 1 on μ^e
-                       par.Z[4:6, 5] .= 1.0     # π, UoM, SPF load 1 on μ^π 
-                       par.Z[4,3] = 1.0  # π does not load on μ^e and Ψ^e
-                       # fill parameters
-                       par.Z[6,1:4] = copy(par.Z[5,1:4]); # common loading on both Eπ
-                       par.Z[4,1:4] = par.Z[4,1:4].+par.Z[5,1:4]; 
-                       # scale with 1/σʸ
-                       par.Z[1:6, 1:5] .= Diagonal(1.0 ./ vec(σʸ)) * par.Z[1:6, 1:5]  # scale the common loadings with 1/σʸ to get common states in true scale
+               if is_two_gap_baseline_model(par_ind, par_size, par)
+                    rewrite_two_gap_baseline_common_block!(par, σʸ)
+               elseif is_two_gap_lag_model(par_ind, par_size, par)
+                    rewrite_two_gap_lag_common_block!(par, σʸ)
                end
-               par.logprior                        = par.logprior + sum(logpdf.(prior_opt.N_plus, par.Z[par_ind.Z_plus .== true]));
-               iend                                = iend+par_size.Z_plus;
+               par.logprior = par.logprior + sum(logpdf.(prior_opt.N_plus, par.Z[par_ind.Z_plus .== true]));
+               iend         = iend+par_size.Z_plus;
           end
 
-          if par_size.Z_minus > 0 
-              par.Z[par_ind.Z_minus .== true] = θ_bound[iend+1:iend+par_size.Z_minus];
-              par.logprior                          = par.logprior + sum(logpdf.(prior_opt.N_minus, par.Z[par_ind.Z_minus .== true]));
-              iend                                  = iend+par_size.Z_minus;
+          if par_size.Z_minus > 0
+               par.Z[par_ind.Z_minus .== true] = θ_bound[iend+1:iend+par_size.Z_minus];
+               par.logprior                    = par.logprior + sum(logpdf.(prior_opt.N_minus, par.Z[par_ind.Z_minus .== true]));
+               iend                            = iend+par_size.Z_minus;
           end
-          
+
           # Transition equations
 
           if par_size.Q > 0
@@ -91,34 +182,35 @@ function set_par!(θ_bound, θ_unb, par, opt_transf, MIN, MAX, par_ind, par_size
 
           if par_size.Q_cov > 0
                par.Q[par_ind.Q_cov .== true] = θ_bound[iend+1:iend+par_size.Q_cov];
-               par.logprior                     = par.logprior + prior_opt.corr;
-               iend                             = iend+par_size.Q_cov;
-               # Set the correlation coefs in Q
+               par.logprior                  = par.logprior + prior_opt.corr;
+               iend                          = iend+par_size.Q_cov;
+
                inds = findall(par_ind.Q_cov .== true);
                for I in inds
-                    row, col = Tuple(I)              
+                    row, col = Tuple(I)
 
-                    ρ = par.Q[row, col]              # sampled correlation from θ
+                    # The sampler stores a correlation coefficient. Convert it to
+                    # covariance using the variances already placed on the Q
+                    # diagonal. For Harvey-cycle blocks, mirror the same
+                    # covariance to the companion-star shock.
+                    ρ = par.Q[row, col]
 
-                    σi2 = par.Q[row, row]            # variance of the diagonals
+                    σi2 = par.Q[row, row]
                     σj2 = par.Q[col, col]
 
-                    cov = ρ * sqrt(σi2 * σj2)        # correlation -> covariance
+                    cov = ρ * sqrt(σi2 * σj2)
 
-                      if par_size.λ > 0
-                              # trig-cycle (AR(2))
-                              par.Q[row,     col    ] = cov
-                              par.Q[col,     row    ] = cov
-                              par.Q[row + 1, col + 1] = cov
-                              par.Q[col + 1, row + 1] = cov
-                         else
-                              # AR(1) 
-                              par.Q[row, col] = cov
-                              par.Q[col, row] = cov
-                         end
+                    if par_size.λ > 0
+                         par.Q[row, col] = cov
+                         par.Q[col, row] = cov
+                         par.Q[row + 1, col + 1] = cov
+                         par.Q[col + 1, row + 1] = cov
+                    else
+                         par.Q[row, col] = cov
+                         par.Q[col, row] = cov
+                    end
                end
           end
-
 
           if par_size.c > 0
                par.c[par_ind.c .== true] = θ_bound[iend+1:iend+par_size.c];
@@ -128,12 +220,14 @@ function set_par!(θ_bound, θ_unb, par, opt_transf, MIN, MAX, par_ind, par_size
 
           if par_size.T > 0 || par_size.λ > 0 || par_size.ρ > 0
 
-               # Set T
+               # Set any directly estimated T entries first
                par.T[par_ind.T .== true] = θ_bound[iend+1:iend+par_size.T];
                par.logprior              = par.logprior + sum(logpdf.(prior_opt.N, par.T[par_ind.T .== true]));
                iend                      = iend+par_size.T;
 
-               # Trigonometric states: update T, λ and ρ. Adjust Q and P¹
+               # Harvey-cycle states: rebuild each 2x2 damped-rotation block
+               # from its frequency λ and damping ρ, then update the matching
+               # stationary variance in Q and P¹.
                if par_size.λ > 0 || par_size.ρ > 0
                     par.λ[par_ind.λ .== true] = θ_bound[iend+1:iend+par_size.λ];
                     par.ρ[par_ind.ρ .== true] = θ_bound[iend+par_size.λ+1:end];

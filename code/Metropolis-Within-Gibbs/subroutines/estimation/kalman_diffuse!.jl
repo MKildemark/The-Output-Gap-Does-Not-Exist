@@ -67,9 +67,9 @@ function kalman_diffuse!(par::ParSsm, do_loglik=0::Int64, do_smoother=0::Int64, 
      K̄  = zeros(k, n, m);
      F  = zeros(m, n);
      F̄  = zeros(m, n);
-     α̂ᶠ = zeros(k, m);
-     Pᶠ = zeros(k, k, m);
-     P̄ᶠ = zeros(k, k, m);
+     α̂ᵀ = zeros(k, m);
+     Pᵀ = zeros(k, k, m);
+     P̄ᵀ = zeros(k, k, m);
 
      # Kalman smoother output
      α̂ˢ = zeros(k, m);
@@ -156,21 +156,21 @@ function kalman_diffuse!(par::ParSsm, do_loglik=0::Int64, do_smoother=0::Int64, 
      # Kalman Filter - Univariate (or sequential) filtering
      # -----------------------------------------------------------------------------------------------------------------
 
-     α̂ᶠᵢ = par.α¹;
-     Pᶠᵢ = par.P¹;
-     P̄ᶠᵢ = par.P̄¹;
+     α̂ᵀᵢ = par.α¹;
+     Pᵀᵢ = par.P¹;
+     P̄ᵀᵢ = par.P̄¹;
 
-     α̂ᶠ[:, 1]    = α̂ᶠᵢ;
-     Pᶠ[:, :, 1] = Pᶠᵢ;
-     P̄ᶠ[:, :, 1] = P̄ᶠᵢ;
+     α̂ᵀ[:, 1]    = α̂ᵀᵢ;
+     Pᵀ[:, :, 1] = Pᵀᵢ;
+     P̄ᵀ[:, :, 1] = P̄ᵀᵢ;
 
      # Loop over t
      for t=1:m
 
           # Get last estimates for α and P
-          α̂ᶠᵢ = α̂ᶠ[:, t];
-          Pᶠᵢ = Pᶠ[:, :, t];
-          P̄ᶠᵢ = P̄ᶠ[:, :, t];
+          α̂ᵀᵢ = α̂ᵀ[:, t];
+          Pᵀᵢ = Pᵀ[:, :, t];
+          P̄ᵀᵢ = P̄ᵀ[:, :, t];
 
           # Handle missing data
           no_na     = ismissing.(yᵃ[:, t]) .== false;
@@ -184,13 +184,13 @@ function kalman_diffuse!(par::ParSsm, do_loglik=0::Int64, do_smoother=0::Int64, 
           for i=1:sum(no_na)
 
                # Kalman filter i-th output
-               Fᵗᵢ = (Z̃ᵗ[i, :]'*Pᶠᵢ*Z̃ᵗ[i, :] + R̃ᵗ[i, i])[1];
-               F̄ᵗᵢ = (Z̃ᵗ[i, :]'*P̄ᶠᵢ*Z̃ᵗ[i, :])[1];
+               Fᵗᵢ = (Z̃ᵗ[i, :]'*Pᵀᵢ*Z̃ᵗ[i, :] + R̃ᵗ[i, i])[1];
+               F̄ᵗᵢ = (Z̃ᵗ[i, :]'*P̄ᵀᵢ*Z̃ᵗ[i, :])[1];
 
                if F̄ᵗᵢ > F_tol || Fᵗᵢ > F_tol
-                    Kᵗᵢ = Pᶠᵢ*Z̃ᵗ[i, :];
-                    K̄ᵗᵢ = P̄ᶠᵢ*Z̃ᵗ[i, :];
-                    νᵗᵢ = (yᵃᵗ[i, :] .- d̃ᵗ[i, :] .- Z̃ᵗ[i, :]'*α̂ᶠᵢ)[1];
+                    Kᵗᵢ = Pᵀᵢ*Z̃ᵗ[i, :];
+                    K̄ᵗᵢ = P̄ᵀᵢ*Z̃ᵗ[i, :];
+                    νᵗᵢ = (yᵃᵗ[i, :] .- d̃ᵗ[i, :] .- Z̃ᵗ[i, :]'*α̂ᵀᵢ)[1];
 
 
                     # --------------------------------------------------------------------------------------------------
@@ -200,10 +200,10 @@ function kalman_diffuse!(par::ParSsm, do_loglik=0::Int64, do_smoother=0::Int64, 
                     if F̄ᵗᵢ > F_tol
 
                          if t < m
-                              # Update α̂ᶠᵢ, Pᶠᵢ and P̄ᶠᵢ
-                              α̂ᶠᵢ = α̂ᶠᵢ + K̄ᵗᵢ/F̄ᵗᵢ*νᵗᵢ;
-                              Pᶠᵢ = Pᶠᵢ + K̄ᵗᵢ*K̄ᵗᵢ'*Fᵗᵢ/(F̄ᵗᵢ^2) - (Kᵗᵢ*K̄ᵗᵢ'+K̄ᵗᵢ*Kᵗᵢ')/F̄ᵗᵢ;
-                              P̄ᶠᵢ = P̄ᶠᵢ - K̄ᵗᵢ/F̄ᵗᵢ*K̄ᵗᵢ';
+                              # Update α̂ᵀᵢ, Pᵀᵢ and P̄ᵀᵢ
+                              α̂ᵀᵢ = α̂ᵀᵢ + K̄ᵗᵢ/F̄ᵗᵢ*νᵗᵢ;
+                              Pᵀᵢ = Pᵀᵢ + K̄ᵗᵢ*K̄ᵗᵢ'*Fᵗᵢ/(F̄ᵗᵢ^2) - (Kᵗᵢ*K̄ᵗᵢ'+K̄ᵗᵢ*Kᵗᵢ')/F̄ᵗᵢ;
+                              P̄ᵀᵢ = P̄ᵀᵢ - K̄ᵗᵢ/F̄ᵗᵢ*K̄ᵗᵢ';
                          end
 
                          # Estimate loglikelihood  (if enabled)
@@ -219,9 +219,9 @@ function kalman_diffuse!(par::ParSsm, do_loglik=0::Int64, do_smoother=0::Int64, 
                     else
 
                          if t < m
-                              # Update α̂ᶠᵢ, Pᶠᵢ and P̄ᶠᵢ (the latter doesn't change in this case)
-                              α̂ᶠᵢ = α̂ᶠᵢ + Kᵗᵢ/Fᵗᵢ*νᵗᵢ;
-                              Pᶠᵢ = Pᶠᵢ - Kᵗᵢ/Fᵗᵢ*Kᵗᵢ';
+                              # Update α̂ᵀᵢ, Pᵀᵢ and P̄ᵀᵢ (the latter doesn't change in this case)
+                              α̂ᵀᵢ = α̂ᵀᵢ + Kᵗᵢ/Fᵗᵢ*νᵗᵢ;
+                              Pᵀᵢ = Pᵀᵢ - Kᵗᵢ/Fᵗᵢ*Kᵗᵢ';
                          end
 
                          # Estimate loglikelihood  (if enabled)
@@ -243,18 +243,18 @@ function kalman_diffuse!(par::ParSsm, do_loglik=0::Int64, do_smoother=0::Int64, 
 
                if t < m
                     # Store Kalman filter output (2/2): t-th values
-                    α̂ᶠ[:, t+1]    = par.c + par.T*α̂ᶠᵢ;
-                    Pᶠ[:, :, t+1] = par.T*Pᶠᵢ*par.T' + par.Q;
-                    P̄ᶠ[:, :, t+1] = par.T*P̄ᶠᵢ*par.T';
+                    α̂ᵀ[:, t+1]    = par.c + par.T*α̂ᵀᵢ;
+                    Pᵀ[:, :, t+1] = par.T*Pᵀᵢ*par.T' + par.Q;
+                    P̄ᵀ[:, :, t+1] = par.T*P̄ᵀᵢ*par.T';
                end
           end
 
           if sum(no_na) == 0 && t < m
 
                # Store Kalman filter predictions
-               α̂ᶠ[:, t+1]    = par.c + par.T*α̂ᶠᵢ;
-               Pᶠ[:, :, t+1] = par.T*Pᶠᵢ*par.T' + par.Q;
-               P̄ᶠ[:, :, t+1] = par.T*P̄ᶠᵢ*par.T';
+               α̂ᵀ[:, t+1]    = par.c + par.T*α̂ᵀᵢ;
+               Pᵀ[:, :, t+1] = par.T*Pᵀᵢ*par.T' + par.Q;
+               P̄ᵀ[:, :, t+1] = par.T*P̄ᵀᵢ*par.T';
           end
      end
 
@@ -334,9 +334,9 @@ function kalman_diffuse!(par::ParSsm, do_loglik=0::Int64, do_smoother=0::Int64, 
                end
 
                # Smoothed states and covariance
-               P̃ᶠ          = [Pᶠ[:, :, t] P̄ᶠ[:, :, t]];
-               α̂ˢ[:, t]    = α̂ᶠ[:, t] + P̃ᶠ*rᵢ;
-               Pˢ[:, :, t] = Pᶠ[:, :, t] - P̃ᶠ*Nᵢ*P̃ᶠ';
+               P̃ᵀ          = [Pᵀ[:, :, t] P̄ᵀ[:, :, t]];
+               α̂ˢ[:, t]    = α̂ᵀ[:, t] + P̃ᵀ*rᵢ;
+               Pˢ[:, :, t] = Pᵀ[:, :, t] - P̃ᵀ*Nᵢ*P̃ᵀ';
           end
      end
 
@@ -354,8 +354,8 @@ function kalman_diffuse!(par::ParSsm, do_loglik=0::Int64, do_smoother=0::Int64, 
           P = Pˢ;
 
      else
-          α = α̂ᶠ;
-          P = Pᶠ;
+          α = α̂ᵀ;
+          P = Pᵀ;
      end
 
      return α, P;
