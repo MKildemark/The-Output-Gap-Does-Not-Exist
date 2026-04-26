@@ -37,7 +37,7 @@ function read_data(data_path::AbstractString, model::AbstractString)
     
 
  
-    if model ==  "two_gap_AR2_6_obs" || model == "okun_kuttner_AR2_6_obs" || model == "rational_short" || model == "rational_short_noise"
+    if model == "two_gap_AR2_6_obs" || model == "two_gap_AR2_6_obs_lags" || model == "okun_kuttner_AR2_6_obs"
         # Pull the level series (as Float64/ Missing vectors)
         y   = Vector{Union{Missing, Float64}}(fQ[rows, gdp])
         e   = Vector{Union{Missing, Float64}}(fQ[rows, employment])
@@ -69,28 +69,28 @@ function read_data(data_path::AbstractString, model::AbstractString)
         # Final matrix: 3 columns 
         data_quarterly = hcat(y, π, uom, spf)
 
-         info_data = DataFrame(XLSX.readtable(data_path, "transf"))
+        info_data = DataFrame(XLSX.readtable(data_path, "transf"))
         MNEMONIC  = info_data[1:end, 2] |> Array{String,1};
         MNEMONIC = vcat(MNEMONIC[1:2], MNEMONIC[6]);
 
-    elseif model == "rational_long" || model == "rational_long_noise"
-        # Pull the level series (as Float64/ Missing vectors)
-        y   = Vector{Union{Missing, Float64}}(fQ[rows, gdp])
-        e   = Vector{Union{Missing, Float64}}(fQ[rows, employment])
-        u   = Vector{Union{Missing, Float64}}(fQ[rows, unemployment])
-        π   = Vector{Union{Missing, Float64}}(fQ[rows, inflation])
+    elseif model == "hasenzagl_2020"
+        y      = Vector{Union{Missing, Float64}}(fQ[rows, gdp])
+        e      = Vector{Union{Missing, Float64}}(fQ[rows, employment])
+        u      = Vector{Union{Missing, Float64}}(fQ[rows, unemployment])
+        oil_p  = Vector{Union{Missing, Float64}}(fQ[rows, oil])
+        π      = Vector{Union{Missing, Float64}}(fQ[rows, inflation])
         core_π = Vector{Union{Missing, Float64}}(fQ[rows, core_inflation])
-        uom = Vector{Union{Missing, Float64}}(fQ[rows, UoM])
-        spf = Vector{Union{Missing, Float64}}(fQ[rows, SPF])
-        lt_inflation = Vector{Union{Missing, Float64}}(fQ[rows, thirty_year_inflation])
+        uom    = Vector{Union{Missing, Float64}}(fQ[rows, UoM])
+        spf    = Vector{Union{Missing, Float64}}(fQ[rows, SPF])
 
-        y = log.(y)*100
-        e = log.(e)*100
+        y = log.(y) * 100
+        e = log.(e) * 100
 
-        # Final matrix: 
-        data_quarterly = hcat(y, e, u, π, lt_inflation)
+        data_quarterly = hcat(y, e, u, oil_p, π, core_π, uom, spf)
 
-   
+        info_data = DataFrame(XLSX.readtable(data_path, "transf"))
+        MNEMONIC  = info_data[1:end, 2] |> Array{String,1}
+
     else
         error("Model not recognized")
 

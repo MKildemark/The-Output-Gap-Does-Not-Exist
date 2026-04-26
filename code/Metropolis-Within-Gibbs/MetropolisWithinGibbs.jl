@@ -17,109 +17,124 @@ module MetropolisWithinGibbs
 # DSGE software (e.g. YADA) uses similar modifications to deal with constrained parameters.
 # ----------------------------------------------------------------------------------------------------------------------
 
-	using DataFrames, Distributions, Distributed, LinearAlgebra;
-	local_path = dirname(@__FILE__);
+    using DataFrames, Distributions, Distributed, LinearAlgebra
+    local_path = dirname(@__FILE__)
 
 
-	# -----------------------------------------------------------------------------------------------------------------
-	# Types
-	# -----------------------------------------------------------------------------------------------------------------
+    # -----------------------------------------------------------------------------------------------------------------
+    # Types
+    # -----------------------------------------------------------------------------------------------------------------
 
-	mutable struct ParSsm{X <: Float64} # Z_plus and Z_minus should not be included here
-		y::Array{Union{X, Missing}, 2}
-		d::Union{Array{X, 1}}
-		Z::Union{Array{X, 1}, Array{X, 2}}
-		R::Union{Array{X, 1}, Array{X, 2}}
-		c::Union{Array{X, 1}}
-		T::Union{Array{X, 1}, Array{X, 2}}
-		Q::Union{Array{X, 1}, Array{X, 2}}
-		H::Union{Array{X, 1}, Array{X, 2}}
-		α¹::Union{Array{X, 1}}
-		P¹::Union{Array{X, 1}, Array{X, 2}}
-		P̄¹::Union{Array{X, 1}, Array{X, 2}}
-		λ::Array{X, 1}
-		ρ::Array{X, 1}
-		logprior::X
-		loglik::X
-		logposterior::X
-	end
+    mutable struct ParSsm{X <: Float64} # Z_plus and Z_minus should not be included here
+        y::Array{Union{X, Missing}, 2}
+        d::Union{Array{X, 1}}
+        Z::Union{Array{X, 1}, Array{X, 2}}
+        R::Union{Array{X, 1}, Array{X, 2}}
+        c::Union{Array{X, 1}}
+        T::Union{Array{X, 1}, Array{X, 2}}
+        Q::Union{Array{X, 1}, Array{X, 2}}
+        α¹::Union{Array{X, 1}}
+        P¹::Union{Array{X, 1}, Array{X, 2}}
+        P̄¹::Union{Array{X, 1}, Array{X, 2}}
+        λ::Array{X, 1}
+        ρ::Array{X, 1}
+        logprior::X
+        loglik::X
+        logposterior::X
+    end
 
-	struct SizeParSsm{X <: Int64}
-		d::X
-		Z::X
-		Z_plus::X
-		Z_minus::X
-		R::X
-		c::X
-		T::X
-		Q::X
-		Q_cov::X
-		H::X
-		λ::X
-		ρ::X
-		θ::X
-	end
+    struct SizeParSsm{X <: Int64}
+        d::X
+        Z::X
+        Z_plus::X
+        Z_minus::X
+        R::X
+        c::X
+        T::X
+        Q::X
+        Q_cov::X
+        λ::X
+        ρ::X
+        θ::X
+    end
+
+    struct BoolParSsm{X1 <: BitArray{1}, X2 <: BitArray{2}}
+        d::X1
+        Z::X2
+        Z_plus::X2
+        Z_minus::X2
+        R::X2
+        c::X1
+        T::X2
+        Q::X2
+        Q_cov::X2
+        λ::X1
+        ρ::X1
+    end
+
+    struct PriorOpt{X <: Float64} # the logpdf for λ and ρ are constants
+        N::Distributions.Normal{X}
+        N_plus::Distributions.Truncated{Normal{X}, Continuous, X}
+        N_minus::Distributions.Truncated{Normal{X}, Continuous, X}
+        IG::Distributions.InverseGamma{X}
+        T::X
+        λ::X
+        ρ::X
+        corr::X
+    end
+
+    import Base.copy
+
+    _copy_field(x::AbstractArray) = copy(x)
+    _copy_field(x) = x
+
+    function copy(par::ParSsm)
+        return ParSsm(_copy_field(par.y),
+                      _copy_field(par.d),
+                      _copy_field(par.Z),
+                      _copy_field(par.R),
+                      _copy_field(par.c),
+                      _copy_field(par.T),
+                      _copy_field(par.Q),
+                      _copy_field(par.α¹),
+                      _copy_field(par.P¹),
+                      _copy_field(par.P̄¹),
+                      _copy_field(par.λ),
+                      _copy_field(par.ρ),
+                      par.logprior,
+                      par.loglik,
+                      par.logposterior)
+    end
+
+    # -----------------------------------------------------------------------------------------------------------------
+    # Subroutines
+    # -----------------------------------------------------------------------------------------------------------------
+
+    # Estimation
+    include("$local_path/subroutines/estimation/kalman_diffuse!.jl")
+    include("$local_path/subroutines/estimation/mwg_main.jl")
+    include("$local_path/subroutines/estimation/mwg_run.jl")
+
+    # Julia's subroutines
+    include("$local_path/subroutines/extra/ex_blkdiag.jl")
+    include("$local_path/subroutines/extra/ex_inv.jl")
+    include("$local_path/subroutines/extra/ex_ismember.jl")
+
+    # Get
+    include("$local_path/subroutines/get/get_logjacobian.jl")
+    include("$local_path/subroutines/get/get_par_bound.jl")
+    include("$local_path/subroutines/get/get_par_unb.jl")
+    include("$local_path/subroutines/get/get_progress.jl")
+    include("$local_path/subroutines/get/get_random_disturbance.jl")
+    include("$local_path/subroutines/get/get_mwg_jump.jl")
+
+    # Set
+    include("$local_path/subroutines/set/set_par.jl")
 
 
+    # -----------------------------------------------------------------------------------------------------------------
+    # Export functions
+    # -----------------------------------------------------------------------------------------------------------------
 
-	struct BoolParSsm{X1 <: BitArray{1}, X2 <: BitArray{2}}
-		d::X1
-		Z::X2
-		Z_plus::X2
-		Z_minus::X2
-		R::X2
-		c::X1
-		T::X2
-		Q::X2
-		Q_cov::X2
-		H::X2
-		λ::X1
-		ρ::X1
-	end
-
-	struct PriorOpt{X <: Float64} # the logpdf for λ and ρ are constants
-		N::Distributions.Normal{X}
-		N_plus::Distributions.Truncated{Normal{X}, Continuous, X}
-		N_minus::Distributions.Truncated{Normal{X}, Continuous, X}
-		IG::Distributions.InverseGamma{X}
-		T::X
-		λ::X
-		ρ::X
-		corr::X
-	end
-
-	import Base.copy
-	Base.copy(x::T) where T = T([getfield(x, k) for k ∈ fieldnames(T)]...)
-
-	# -----------------------------------------------------------------------------------------------------------------
-	# Subroutines
-	# -----------------------------------------------------------------------------------------------------------------
-
-	# Estimation
-	include("$local_path/subroutines/estimation/kalman_diffuse!.jl");
-	include("$local_path/subroutines/estimation/mwg_main.jl");
-	include("$local_path/subroutines/estimation/mwg_run.jl");
-
-	# Julia's subroutines
-	include("$local_path/subroutines/extra/ex_blkdiag.jl");
-	include("$local_path/subroutines/extra/ex_inv.jl");
-	include("$local_path/subroutines/extra/ex_ismember.jl");
-
-	# Get
-	include("$local_path/subroutines/get/get_logjacobian.jl");
-	include("$local_path/subroutines/get/get_par_bound.jl");
-	include("$local_path/subroutines/get/get_par_unb.jl");
-	include("$local_path/subroutines/get/get_progress.jl");
-	include("$local_path/subroutines/get/get_random_disturbance.jl");
-	include("$local_path/subroutines/get/get_mwg_jump.jl");
-
-	# Set
-	include("$local_path/subroutines/set/set_par.jl");
-
-
-	# -----------------------------------------------------------------------------------------------------------------
-	# Export functions
-	# -----------------------------------------------------------------------------------------------------------------
-
-	export kalman_diffuse!, mwg_main, ex_blkdiag, ex_inv, ex_ismember, set_par_fast!, ParSsm, SizeParSsm, BoolParSsm, PriorOpt;
+    export kalman_diffuse!, mwg_main, ex_blkdiag, ex_inv, ex_ismember, ParSsm, SizeParSsm, BoolParSsm, PriorOpt
 end
