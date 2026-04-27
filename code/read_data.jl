@@ -37,7 +37,7 @@ function read_data(data_path::AbstractString, model::AbstractString)
     
 
  
-    if model == "two_gap_AR2_6_obs" || model == "two_gap_AR2_6_obs_lags" || model == "okun_kuttner_AR2_6_obs"
+    if model == "two_gap" || model == "okun_kuttner"
         # Pull the level series (as Float64/ Missing vectors)
         y   = Vector{Union{Missing, Float64}}(fQ[rows, gdp])
         e   = Vector{Union{Missing, Float64}}(fQ[rows, employment])
@@ -58,7 +58,7 @@ function read_data(data_path::AbstractString, model::AbstractString)
         MNEMONIC  = info_data[1:end, 2] |> Array{String,1};
         MNEMONIC = vcat(MNEMONIC[1:3], MNEMONIC[6:8]);
 
-    elseif model == "kuttner_AR2_4_obs"  
+    elseif model == "kuttner"  
         # Pull the level series (as Float64/ Missing vectors)
         y   = Vector{Union{Missing, Float64}}(fQ[rows, gdp])
         y = log.(y)*100
